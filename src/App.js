@@ -1,25 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Auth from "./Auth";
+import HomePage from "./HomePage";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const token = sessionStorage.getItem("sb_token");
+
+    return (
+        <Router>
+            <Routes>
+                {/* Strona logowania/rejestracji */}
+                <Route
+                    path="/auth"
+                    element={!token ? <Auth /> : <Navigate to="/" />}
+                />
+
+                {/* Strona główna – dostępna tylko gdy zalogowany */}
+                <Route
+                    path="/"
+                    element={token ? <HomePage /> : <Navigate to="/auth" />}
+                />
+
+                {/* Domyślne przekierowanie */}
+                <Route path="*" element={<Navigate to={token ? "/" : "/auth"} />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

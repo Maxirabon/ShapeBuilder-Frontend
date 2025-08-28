@@ -1,0 +1,87 @@
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #f8fafc, #e2e8f0);
+}
+
+.auth-card {
+    width: 400px;
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.auth-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.auth-tabs button {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #f1f5f9;
+    cursor: pointer;
+}
+
+.auth-tabs .active {
+    background: #1e293b;
+    color: white;
+}
+
+.auth-msg {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-msg.success {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.auth-msg.error {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.auth-form {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.auth-form label {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.auth-form input,
+.auth-form select {
+    padding: 0.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+}
+
+.auth-form button {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #1e293b;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
