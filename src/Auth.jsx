@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { loginUser, registerUser } from "./api";
 import "./Auth.css";
+import Logo from "./assets/logo.png"
 
 export default function AuthPage() {
     const [tab, setTab] = useState("login");
@@ -44,7 +45,6 @@ export default function AuthPage() {
         setLoading(true);
         setMsg(null);
 
-        // walidacja przed wysłaniem
         if (Number(reg.age) < 1 || Number(reg.weight) < 1 || Number(reg.height) < 1) {
             setMsg({ type: "error", text: "Wiek, waga i wzrost muszą być większe niż 0" });
             setLoading(false);
@@ -72,7 +72,7 @@ export default function AuthPage() {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h1 className="auth-title">ShapeBuilder</h1>
+                <img src={Logo} alt="ShapeBuilder logo" className="auth-logo" />
 
                 <div className="auth-tabs">
                     <button
@@ -216,11 +216,11 @@ export default function AuthPage() {
                                     setReg({ ...reg, activity: e.target.value })
                                 }
                             >
-                                <option value="BRAK">Brak</option>
-                                <option value="MALA">Mała</option>
-                                <option value="SREDNIA">Średnia</option>
-                                <option value="DUZA">Duża</option>
-                                <option value="BARDZO_DUZA">Bardzo duża</option>
+                                <option value="BRAK">Brak (brak treningów)</option>
+                                <option value="MALA">Mała (1 - 2 jednostki w tyg)</option>
+                                <option value="SREDNIA">Średnia (3 - 4 jednostki w tyg)</option>
+                                <option value="DUZA">Duża (5 - 6 jednostek w tyg)</option>
+                                <option value="BARDZO_DUZA">Bardzo duża (7+ jednostek w tyg)</option>
                             </select>
                         </label>
                         <button disabled={loading}>

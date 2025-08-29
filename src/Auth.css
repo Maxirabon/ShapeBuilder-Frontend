@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(to bottom right, #f8fafc, #e2e8f0);
+    background: linear-gradient(to bottom right, #34eb4f, #e2e8f0);
 }
 
 .auth-card {
@@ -14,11 +14,11 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
-.auth-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    text-align: center;
+.auth-logo {
+    width: 200px;
+    height: auto;
+    margin: 0 auto 20px;
+    display: block;
 }
 
 .auth-tabs {
@@ -37,7 +37,7 @@
 }
 
 .auth-tabs .active {
-    background: #1e293b;
+    background: #0d822c;
     color: white;
 }
 
@@ -80,7 +80,7 @@
     padding: 0.75rem;
     border: none;
     border-radius: 0.5rem;
-    background: #1e293b;
+    background: #0d822c;
     color: white;
     font-weight: bold;
     cursor: pointer;
