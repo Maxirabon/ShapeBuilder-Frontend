@@ -31,8 +31,18 @@ export default function AuthPage() {
         try {
             const token = await loginUser(login);
             sessionStorage.setItem("sb_token", token);
+            const payload = JSON.parse(atob(token.split('.')[1]));
+
+            const userData = {
+                id: payload.id,
+                firstName: payload.firstName,
+                lastName: payload.lastName,
+                role: payload.role
+            };
+
+            sessionStorage.setItem("sb_user", JSON.stringify(userData));
             setMsg({ type: "success", text: "Zalogowano pomyślnie" });
-            window.location.href = "/";
+            window.location.href = "/calendar";
         } catch (err) {
             setMsg({ type: "error", text: err.message });
         } finally {
