@@ -42,3 +42,34 @@ export async function registerUser(userData) {
     }
     return await res.json();
 }
+
+/**
+ * Tworzy nagłówki autoryzacyjne do zapytań API
+ * Pobiera token JWT z sessionStorage i dodaje go do nagłówka Authorization
+ * @returns {Object} - nagłówki z Content-Type i Authorization
+ */
+function getAuthHeaders() {
+    const token = sessionStorage.getItem("sb_token");
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
+}
+
+/**
+ * Pobranie dni zalogowanego użytkownika
+ * Wymaga aktywnego JWT w sessionStorage
+ * @returns {Promise<Array>} - lista dni użytkownika zwrócona z backendu
+ * */
+export async function getUserDays() {
+    const res = await fetch(`${API_URL}/user/getUserDays`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+        throw new Error("Błąd pobierania dni użytkownika");
+    }
+
+    return await res.json();
+}

@@ -42,7 +42,7 @@ export default function AuthPage() {
 
             sessionStorage.setItem("sb_user", JSON.stringify(userData));
             setMsg({ type: "success", text: "Zalogowano pomyślnie" });
-            window.location.href = "/calendar";
+            window.location.href = "/";
         } catch (err) {
             setMsg({ type: "error", text: err.message });
         } finally {

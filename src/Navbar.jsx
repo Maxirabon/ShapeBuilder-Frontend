@@ -25,7 +25,7 @@ export default function Navbar({ setToken }) {
 
             <div className="navbar-links">
                 <button onClick={() => navigate("/profile")}>Profil</button>
-                <button onClick={() => navigate("/calendar")}>Kalendarz</button>
+                <button onClick={() => navigate("/")}>Kalendarz</button>
                 <button onClick={() => navigate("/summary")}>Podsumowanie</button>
                 {isAdmin && (
                     <button onClick={() => navigate("/admin")}>Użytkownicy</button>
