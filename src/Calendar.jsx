@@ -164,13 +164,13 @@ export default function Calendar() {
 
                                 <div className="day-actions">
                                     <button
-                                        className="day-btn"
+                                        className="day-btn nutrition"
                                         onClick={() => console.log("Plan żywieniowy:", entry)}
                                     >
                                         Żywienie
                                     </button>
                                     <button
-                                        className="day-btn"
+                                        className="day-btn training"
                                         onClick={() => console.log("Trening:", entry)}
                                     >
                                         Trening

@@ -5,7 +5,7 @@
 /* całe tło sekcji pod navbar */
 .calendar-container {
     padding: calc(var(--navbar-height) + 20px) 20px 40px 20px;
-    max-width: 1300px; /* lekko szersza sekcja */
+    max-width: 1450px; /* lekko szersza sekcja */
     margin: 0 auto;
     box-sizing: border-box;
     min-height: calc(100vh - var(--navbar-height) - 40px);
@@ -138,6 +138,21 @@
     border: 1px solid #ccc;
     background: #fafafa;
     cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; /* animacja hover */
+}
+
+/* przycisk Żywienie */
+.day-btn.nutrition:hover {
+    background-color: #34eb4f;
+    color: #fff;
+    border-color: #34eb4f;
+}
+
+/* przycisk Trening */
+.day-btn.training:hover {
+    background-color: #000000;
+    color: #fff;
+    border-color: #ccc;
 }
 
 .calendar-loading {
