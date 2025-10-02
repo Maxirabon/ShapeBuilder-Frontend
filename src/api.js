@@ -123,3 +123,17 @@ export async function addMealProduct(meal_id, product_id, amount) {
     if (!res.ok) throw new Error("Błąd dodawania produktu do posiłku");
     return await res.json();
 }
+
+/**
+ * Pobranie podsumowanie dziennego w kontekście żywienia
+ * Wymaga aktywnego JWT w sessionStorage
+ * @returns {Promise<any>} - listę produktów z wszystkich posiłków dnia
+ */
+export async function getDaySummary(dayId) {
+    const res = await fetch(`${API_URL}/user/getDaySummary/${dayId}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Błąd pobierania podsumowania dnia");
+    return await res.json();
+}

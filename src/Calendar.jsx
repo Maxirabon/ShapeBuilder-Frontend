@@ -85,6 +85,7 @@ export default function Calendar() {
 
     useEffect(() => {
         if (!productModal.open) return;
+
         async function fetchProducts() {
             try {
                 const products = await getAllProducts();
@@ -93,6 +94,7 @@ export default function Calendar() {
                 console.error("Błąd pobierania produktów:", err);
             }
         }
+
         fetchProducts();
     }, [productModal.open]);
 
@@ -144,7 +146,7 @@ export default function Calendar() {
             return;
         }
 
-        console.log({ meal_id: mealId, product_id: productId, amount: parsedAmount });
+        console.log({meal_id: mealId, product_id: productId, amount: parsedAmount});
 
         try {
             const updatedMeal = await addMealProduct(mealId, productId, parsedAmount);
@@ -167,7 +169,7 @@ export default function Calendar() {
             });
 
             // Czyszczenie pola ilości dla tego produktu
-            setAmounts((prev) => ({ ...prev, [productId]: "" }));
+            setAmounts((prev) => ({...prev, [productId]: ""}));
         } catch (error) {
             console.error("Błąd podczas dodawania produktu:", error);
             alert(error.message || "Nie udało się dodać produktu");
@@ -201,6 +203,24 @@ export default function Calendar() {
                                     <div key={meal.id} className="meal-section">
                                         <h3>{meal.description}</h3>
                                         <div className="meal-buttons">
+                                            {/* <-- Tutaj dodaj renderowanie produktów z backendu --> */}
+                                            {meal.mealProducts && meal.mealProducts.length > 0 ? (
+                                                <div className="meal-products">
+                                                    {meal.mealProducts.map((p) => (
+                                                        <div key={p.id} className="meal-product-item">
+                                    <span>
+                                        {p.name} - {p.amount}g |
+                                        kcal: {p.calories},
+                                        B: {p.protein}g,
+                                        W: {p.carbs}g,
+                                        T: {p.fat}g
+                                    </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="no-products">Brak produktów</div>
+                                            )}
                                             <button
                                                 onClick={() =>
                                                     setProductModal({
@@ -220,14 +240,14 @@ export default function Calendar() {
                                                 Moje produkty
                                             </button>
                                         </div>
-                                            <hr className="meal-divider" />
+                                        <hr className="meal-divider"/>
                                     </div>
                                 ))}
 
                                 <button
                                     className="close-btn"
                                     onClick={() =>
-                                        setNutritionModal({ open: false, date: null, entry: null })
+                                        setNutritionModal({open: false, date: null, entry: null})
                                     }
                                 >
                                     Zamknij
