@@ -73,3 +73,53 @@ export async function getUserDays() {
 
     return await res.json();
 }
+
+/**
+ * Pobranie dziennego zapotrzebowania kalorycznego użytkownika
+ * Wymaga aktywnego JWT w sessionStorage
+ * @returns {Promise<any>} - double (zapotrzebowanie kaloryczne)
+ */
+export async function getUserCaloricRequisition(){
+    const res = await fetch(`${API_URL}/user/getCaloricRequisition`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+        throw new Error("Błąd pobierania zapotrzebowania kalorycznego użytkownika");
+    }
+
+    return await res.json();
+}
+
+/**
+ * Pobranie wszystkich produktów z bazy
+ * Wymaga aktywnego JWT w sessionStorage
+ * @returns {Promise<any>} - listę produktów z bazy
+ */
+export async function getAllProducts() {
+    const res = await fetch(`${API_URL}/user/getAllProducts`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Błąd pobierania produktów");
+    return res.json();
+}
+
+/**
+ *
+ * @param meal_id
+ * @param product_id
+ * @param amount
+ * @returns {Promise<void>}
+ */
+export async function addMealProduct(meal_id, product_id, amount) {
+    const res = await fetch(`${API_URL}/user/addMealProduct`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ meal_id, product_id, amount }),
+    });
+
+    if (!res.ok) throw new Error("Błąd dodawania produktu do posiłku");
+    return await res.json();
+}

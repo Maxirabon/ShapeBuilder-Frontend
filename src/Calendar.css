@@ -2,10 +2,14 @@
     --navbar-height: 64px; /* domyślna wysokość navbaru */
 }
 
+body {
+    background-color: #e6f9e6;
+}
+
 /* całe tło sekcji pod navbar */
 .calendar-container {
     padding: calc(var(--navbar-height) + 20px) 20px 40px 20px;
-    max-width: 1450px; /* lekko szersza sekcja */
+    max-width: 1600px; /* lekko szersza sekcja */
     margin: 0 auto;
     box-sizing: border-box;
     min-height: calc(100vh - var(--navbar-height) - 40px);
@@ -21,7 +25,13 @@
 
 .calendar-user {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
+}
+
+.calendar-calories {
+    margin: 0;
+    font-weight: bold;
+    font-size: 20px;
 }
 
 /* karta z miesiącem */
@@ -159,3 +169,154 @@
     padding-top: calc(var(--navbar-height) + 20px);
     text-align: center;
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+
+.meal-divider {
+    border: 0;
+    height: 2px;
+    background: #34eb4f;
+    margin: 16px 0;
+    border-radius: 1px;
+}
+
+
+/* sekcje posiłków - wygląd jak karta kalendarza */
+.meal-section {
+    background: #f5f5f5;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+/* nagłówki posiłków */
+.meal-section h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* przyciski w sekcjach - centralne wyrównanie */
+.meal-buttons {
+    display: flex;
+    justify-content: center;  /* wyśrodkowanie */
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* przyciski w posiłkach takie same jak w kalendarzu */
+.meal-buttons button {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* hover efekt jak przycisk treningu */
+.meal-buttons button:hover {
+    background-color: #000000;
+    color: #fff;
+    border-color: #ccc;
+}
+
+/* Lista produktów */
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Pojedynczy produkt w liście */
+.product-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Input dla ilości w produkcie */
+.product-item input[type="number"] {
+    width: 80px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Przyciski Dodaj w produktach */
+.product-item button {
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.product-item button:hover {
+    background-color: #34eb4f;
+    color: #fff;
+    border-color: #34eb4f;
+}
+
+/* Pole wyszukiwania w modalu */
+.search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+/* przycisk zamknij jak wyloguj w navbarze */
+.close-btn {
+    display: block;
+    margin: 20px auto 0 auto; /* wyśrodkowanie */
+    background: lightgrey;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.close-btn:hover {
+    background: #dc2626; /* czerwony hover jak logout */
+    color: black;
+}
+
