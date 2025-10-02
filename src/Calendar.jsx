@@ -137,19 +137,40 @@ export default function Calendar() {
     const goNext = () => setCurrentMonth(new Date(year, monthIndex + 1, 1));
 
     const handleAddProduct = async (mealId, productId, amount) => {
-        if (!amount || amount <= 0) {
+        const parsedAmount = Number(amount);
+
+        if (!parsedAmount || parsedAmount <= 0) {
             alert("Podaj poprawną ilość produktu");
             return;
         }
 
+        console.log({ meal_id: mealId, product_id: productId, amount: parsedAmount });
+
         try {
-            await addMealProduct(mealId, productId, Number(amount));
-            alert("Produkt dodany do posiłku!");
-            setProductModal({open: false, mealId: null, mealType: null});
-            setAmounts({});
-        } catch (err) {
-            console.error(err);
-            alert("Błąd przy dodawaniu produktu");
+            const updatedMeal = await addMealProduct(mealId, productId, parsedAmount);
+
+            // Aktualizacja stanu nutritionModal w bezpieczny sposób
+            setNutritionModal((prev) => {
+                if (!prev.entry) return prev;
+
+                const meals = prev.entry.meals.map((meal) =>
+                    meal.id === updatedMeal.id ? updatedMeal : meal
+                );
+
+                return {
+                    ...prev,
+                    entry: {
+                        ...prev.entry,
+                        meals,
+                    },
+                };
+            });
+
+            // Czyszczenie pola ilości dla tego produktu
+            setAmounts((prev) => ({ ...prev, [productId]: "" }));
+        } catch (error) {
+            console.error("Błąd podczas dodawania produktu:", error);
+            alert(error.message || "Nie udało się dodać produktu");
         }
     };
 
@@ -199,9 +220,7 @@ export default function Calendar() {
                                                 Moje produkty
                                             </button>
                                         </div>
-                                        {meal.id !== nutritionModal.entry.meals.slice(-1)[0].id && (
                                             <hr className="meal-divider" />
-                                        )}
                                     </div>
                                 ))}
 
