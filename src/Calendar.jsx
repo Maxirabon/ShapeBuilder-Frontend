@@ -1,3 +1,4 @@
+
 import React, {useEffect, useMemo, useState} from "react";
 import {addMealProduct, getAllProducts, getUserCaloricRequisition, getUserDays} from "./api";
 import "./Calendar.css";
@@ -168,6 +169,20 @@ export default function Calendar() {
                 };
             });
 
+            setRawDays((prevDays) => {
+                const key = formatYYYYMMDD(nutritionModal.date);
+                return prevDays.map((day) =>
+                    formatYYYYMMDD(parseDateFromServer(day)) === key
+                        ? {
+                            ...day,
+                            meals: day.meals.map((meal) =>
+                                meal.id === updatedMeal.id ? updatedMeal : meal
+                            ),
+                        }
+                        : day
+                );
+            });
+
             // Czyszczenie pola ilości dla tego produktu
             setAmounts((prev) => ({...prev, [productId]: ""}));
         } catch (error) {
@@ -202,25 +217,23 @@ export default function Calendar() {
                                 {nutritionModal.entry.meals.map((meal) => (
                                     <div key={meal.id} className="meal-section">
                                         <h3>{meal.description}</h3>
+                                        {/* Lista produktów */}
+                                        {meal.mealProducts && meal.mealProducts.length > 0 ? (
+                                            <div className="meal-products">
+                                                {meal.mealProducts.map((p) => (
+                                                    <div key={p.id} className="meal-product-item">
+                    <span>
+                        {p.name} - {p.amount}g | kcal: {p.calories}, B: {p.protein}g, W: {p.carbs}g, T: {p.fat}g
+                    </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="no-products">Brak produktów</div>
+                                        )}
+
+                                        {/* Przyciski posiłku pod listą produktów */}
                                         <div className="meal-buttons">
-                                            {/* <-- Tutaj dodaj renderowanie produktów z backendu --> */}
-                                            {meal.mealProducts && meal.mealProducts.length > 0 ? (
-                                                <div className="meal-products">
-                                                    {meal.mealProducts.map((p) => (
-                                                        <div key={p.id} className="meal-product-item">
-                                    <span>
-                                        {p.name} - {p.amount}g |
-                                        kcal: {p.calories},
-                                        B: {p.protein}g,
-                                        W: {p.carbs}g,
-                                        T: {p.fat}g
-                                    </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="no-products">Brak produktów</div>
-                                            )}
                                             <button
                                                 onClick={() =>
                                                     setProductModal({
@@ -240,7 +253,6 @@ export default function Calendar() {
                                                 Moje produkty
                                             </button>
                                         </div>
-                                        <hr className="meal-divider"/>
                                     </div>
                                 ))}
 

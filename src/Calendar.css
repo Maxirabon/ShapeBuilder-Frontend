@@ -181,8 +181,8 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 999;
-    overflow-y: auto; /* pozwala scrollować cały modal jeśli wysoki */
-    padding: 20px 0; /* trochę przestrzeni od góry/dół */
+    overflow-y: auto;
+    padding: 20px 0;
 }
 
 .modal-content {
@@ -191,24 +191,14 @@ body {
     padding: 20px;
     max-width: 600px;
     width: 90%;
-    max-height: 90vh; /* ograniczenie wysokości do 90% wysokości okna */
+    max-height: 90vh;
     box-shadow: 0 6px 18px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* scrollowanie zawartości jeśli za dużo */
+    overflow-y: auto;
 }
 
-.meal-divider {
-    border: 0;
-    height: 2px;
-    background: #34eb4f;
-    margin: 16px 0 -16px -16px; /* przecięcie z paddingiem sekcji */
-    border-radius: 1px;
-    width: calc(100% + 32px); /* dopasowanie do pełnej szerokości szarej karty */
-}
-
-
-/* sekcje posiłków - wygląd jak karta kalendarza */
+/* Sekcja posiłku */
 .meal-section {
     background: #f5f5f5;
     border-radius: 12px;
@@ -219,7 +209,6 @@ body {
     flex-direction: column;
 }
 
-/* nagłówki posiłków */
 .meal-section h3 {
     margin-top: 0;
     margin-bottom: 12px;
@@ -228,15 +217,72 @@ body {
     text-align: center;
 }
 
-/* przyciski w sekcjach - centralne wyrównanie */
-.meal-buttons {
+/* Lista produktów w posiłku */
+.meal-products {
     display: flex;
-    justify-content: center;  /* wyśrodkowanie */
+    flex-direction: column;
     gap: 10px;
-    flex-wrap: wrap;
+    margin-bottom: 12px;
 }
 
-/* przyciski w posiłkach takie same jak w kalendarzu */
+/* Pojedynczy produkt w posiłku */
+.meal-product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Tekst produktu (nazwa i wartości odżywcze) */
+.meal-product-item span {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: #333;
+    flex: 1; /* zajmuje całą dostępną przestrzeń, przyciski nie wypychają */
+}
+
+.meal-product-item span b {
+    font-weight: 600;
+}
+
+/* Opcjonalny przycisk przy produkcie */
+.meal-product-item button {
+    background-color: #34eb4f;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 8px; /* odsuwa od tekstu */
+}
+
+.meal-product-item button:hover {
+    background-color: #2cbf43;
+}
+
+/* Hover całego wiersza produktu */
+.meal-product-item:hover {
+    background-color: #f0fdf0;
+}
+
+/* Przyciski posiłku pod listą produktów */
+.meal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
 .meal-buttons button {
     font-size: 12px;
     padding: 6px 10px;
@@ -247,24 +293,34 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/* hover efekt jak przycisk treningu */
 .meal-buttons button:hover {
     background-color: #000000;
     color: #fff;
     border-color: #ccc;
 }
 
-/* Lista produktów */
+/* Przyciski Dodaj produkt / Moje produkty powinny być pod listą produktów i wyśrodkowane */
+
+/* Pole wyszukiwania w modalach */
+.search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+/* Lista produktów do dodania (w productModal) */
 .product-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 300px; /* wysokość boxa z scroll */
+    max-height: 300px;
     overflow-y: auto;
     padding-right: 4px;
 }
 
-/* Pojedynczy produkt w liście */
 .product-item {
     display: flex;
     gap: 8px;
@@ -276,7 +332,6 @@ body {
     border: 1px solid #e0e0e0;
 }
 
-/* Input dla ilości w produkcie */
 .product-item input[type="number"] {
     width: 80px;
     padding: 4px 6px;
@@ -284,7 +339,6 @@ body {
     border: 1px solid #ccc;
 }
 
-/* Przyciski Dodaj w produktach */
 .product-item button {
     font-size: 12px;
     padding: 6px 8px;
@@ -301,20 +355,10 @@ body {
     border-color: #34eb4f;
 }
 
-/* Pole wyszukiwania w modalu */
-.search-input {
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    margin-bottom: 12px;
-    box-sizing: border-box;
-}
-
-/* przycisk zamknij jak wyloguj w navbarze */
+/* Zamknij modal */
 .close-btn {
     display: block;
-    margin: 20px auto 0 auto; /* wyśrodkowanie */
+    margin: 20px auto 0 auto;
     background: lightgrey;
     border: none;
     font-weight: 700;
@@ -325,7 +369,6 @@ body {
 }
 
 .close-btn:hover {
-    background: #dc2626; /* czerwony hover jak logout */
+    background: #dc2626;
     color: black;
 }
-

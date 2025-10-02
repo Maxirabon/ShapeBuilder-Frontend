@@ -125,9 +125,9 @@ export async function addMealProduct(meal_id, product_id, amount) {
 }
 
 /**
- * Pobranie podsumowanie dziennego w kontekście żywienia
- * Wymaga aktywnego JWT w sessionStorage
- * @returns {Promise<any>} - listę produktów z wszystkich posiłków dnia
+ * Pobranie podsumowania dziennego (z posiłkami i produktami)
+ * @param {number} dayId - id dnia (calendarId z backendu)
+ * @returns {Promise<any>}
  */
 export async function getDaySummary(dayId) {
     const res = await fetch(`${API_URL}/user/getDaySummary/${dayId}`, {
