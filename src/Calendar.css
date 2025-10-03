@@ -9,7 +9,7 @@ body {
 /* całe tło sekcji pod navbar */
 .calendar-container {
     padding: calc(var(--navbar-height) + 20px) 20px 40px 20px;
-    max-width: 1600px; /* lekko szersza sekcja */
+    max-width: 1800px; /* lekko szersza sekcja */
     margin: 0 auto;
     box-sizing: border-box;
     min-height: calc(100vh - var(--navbar-height) - 40px);
@@ -366,7 +366,6 @@ body {
     border-color: #ccc;
 }
 
-/* Przyciski Dodaj produkt / Moje produkty powinny być pod listą produktów i wyśrodkowane */
 
 /* Pole wyszukiwania w modalach */
 .search-input {
@@ -420,6 +419,13 @@ body {
     background-color: #34eb4f;
     color: #fff;
     border-color: #34eb4f;
+}
+
+.modal-userproducts-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
 }
 
 /* Zamknij modal */

@@ -1,10 +1,10 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {
-    addMealProduct,
+    addMealProduct, addUserProduct,
     deleteMealProduct,
     getAllProducts,
     getUserCaloricRequisition,
-    getUserDays,
+    getUserDays, getUserProducts,
     updateMealProduct
 } from "./api";
 import "./Calendar.css";
@@ -42,9 +42,29 @@ export default function Calendar() {
     const [CaloricRequisition, setCaloricRequisition] = useState(null);
     const [nutritionModal, setNutritionModal] = useState({open: false, date: null, entry: null});
     const [productModal, setProductModal] = useState({open: false, mealId: null, mealType: null});
+    const [userProductModal, setUserProductModal] = useState({open: false, mealId: null, mealType: null});
     const [allProducts, setAllProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [amounts, setAmounts] = useState({});
+    const [allUserProducts, setAllUserProducts] = useState([]);
+    const [addUserProductModal, setAddUserProductModal] = useState({ open: false });
+    const [newUserProduct, setNewUserProduct] = useState({
+        name: "",
+        protein: "",
+        carbs: "",
+        fat: "",
+        calories: ""
+    });
+
+    const minDate = useMemo(() => {
+        if (!rawDays.length) return null;
+        return parseDateFromServer(rawDays[0]);
+    }, [rawDays]);
+
+    const maxDate = useMemo(() => {
+        if (!rawDays.length) return null;
+        return parseDateFromServer(rawDays[rawDays.length - 1]);
+    }, [rawDays]);
 
 
     // Ustawienie paddingu dla kontentu pod Navbar
@@ -105,6 +125,21 @@ export default function Calendar() {
         fetchProducts();
     }, [productModal.open]);
 
+    useEffect(() => {
+        if (!userProductModal.open) return;
+
+        async function fetchUserProducts() {
+            try {
+                const userProducts = await getUserProducts();
+                setAllUserProducts(userProducts);
+            } catch (err) {
+                console.error("Błąd pobierania produktow uzytkownika:", err);
+            }
+        }
+
+        fetchUserProducts();
+    }, [userProductModal.open]);
+
     // Mapa dni do obiektów backendu
     const daysMap = useMemo(() => {
         const m = new Map();
@@ -142,11 +177,22 @@ export default function Calendar() {
         currentMonth.toLocaleString("pl-PL", {month: "long", year: "numeric"})
     );
 
-    const goPrev = () => setCurrentMonth(new Date(year, monthIndex - 1, 1));
-    const goNext = () => setCurrentMonth(new Date(year, monthIndex + 1, 1));
+    const goPrev = () => {
+        const prev = new Date(year, monthIndex - 1, 1);
+        if (!minDate || prev >= new Date(minDate.getFullYear(), minDate.getMonth(), 1)) {
+            setCurrentMonth(prev);
+        }
+    };
+
+    const goNext = () => {
+        const next = new Date(year, monthIndex + 1, 1);
+        if (!maxDate || next <= new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)) {
+            setCurrentMonth(next);
+        }
+    };
 
     function getDayTotals(day) {
-        if (!day || !day.meals) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        if (!day || !day.meals) return {calories: 0, protein: 0, carbs: 0, fat: 0};
         return day.meals.reduce((acc, meal) => {
             meal.mealProducts.forEach(p => {
                 acc.calories += p.calories;
@@ -155,13 +201,18 @@ export default function Calendar() {
                 acc.fat += p.fat;
             });
             return acc;
-        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        }, {calories: 0, protein: 0, carbs: 0, fat: 0});
     }
 
     const handleAddProduct = async (mealId, productId, amount, date) => {
         const parsedAmount = Number(amount);
         if (!parsedAmount || parsedAmount <= 0) {
+            console.log("Invalid data detected", { mealId, productId, parsedAmount, date });
             alert("Podaj poprawną ilość produktu");
+            return;
+        }
+        if (!mealId || !productId || !parsedAmount || parsedAmount <= 0 || !date) {
+            alert("Brak wymaganych danych lub niepoprawna ilość");
             return;
         }
 
@@ -174,7 +225,7 @@ export default function Calendar() {
                 const meals = prev.entry.meals.map(meal =>
                     meal.id === updatedMeal.id ? updatedMeal : meal
                 );
-                return { ...prev, entry: { ...prev.entry, meals } };
+                return {...prev, entry: {...prev.entry, meals}};
             });
 
             // Aktualizacja rawDays
@@ -190,7 +241,7 @@ export default function Calendar() {
                 })
             );
 
-            setAmounts(prev => ({ ...prev, [productId]: "" }));
+            setAmounts(prev => ({...prev, [productId]: ""}));
         } catch (error) {
             alert(error.message || "Nie udało się dodać produktu");
         }
@@ -221,7 +272,7 @@ export default function Calendar() {
                         }
                         : meal
                 );
-                return { ...prev, entry: { ...prev.entry, meals } };
+                return {...prev, entry: {...prev.entry, meals}};
             });
 
             // Aktualizacja rawDays
@@ -265,7 +316,7 @@ export default function Calendar() {
                         }
                         : meal
                 );
-                return { ...prev, entry: { ...prev.entry, meals } };
+                return {...prev, entry: {...prev.entry, meals}};
             });
 
             // Aktualizacja rawDays
@@ -289,6 +340,31 @@ export default function Calendar() {
             alert(error.message || "Nie udało się usunąć produktu");
         }
     };
+
+    const handleSaveUserProduct = async () => {
+        if (!newUserProduct.name || !newUserProduct.protein || !newUserProduct.carbs || !newUserProduct.fat || !newUserProduct.calories) {
+            alert("Uzupełnij wszystkie pola!");
+            return;
+        }
+
+        try {
+            const created = await addUserProduct({
+                name: newUserProduct.name,
+                protein: Number(newUserProduct.protein),
+                carbs: Number(newUserProduct.carbs),
+                fat: Number(newUserProduct.fat),
+                calories: Number(newUserProduct.calories),
+            });
+
+            setAllUserProducts((prev) => [...prev, created]);
+            setAddUserProductModal({ open: false });
+            setNewUserProduct({ name: "", protein: "", carbs: "", fat: "", calories: "" });
+        } catch (err) {
+            alert(err.message || "Nie udało się dodać produktu");
+        }
+    };
+
+
 
     return (
         <div className="calendar-container">
@@ -316,19 +392,17 @@ export default function Calendar() {
                             <div className="modal-content">
                                 <h2>Dodaj posiłek - {formatYYYYMMDD(nutritionModal.date)}</h2>
 
-                                {nutritionModal.entry && (
-                                    (() => {
-                                        const dayTotals = getDayTotals(nutritionModal.entry);
-                                        return (
-                                            <div className="day-totals-modal">
-                                                <strong>Łącznie dzisiaj:</strong> kcal: {dayTotals.calories.toFixed(2)},
-                                                B: {dayTotals.protein.toFixed(2)}g,
-                                                T: {dayTotals.fat.toFixed(2)}g,
-                                                W: {dayTotals.carbs.toFixed(2)}g
-                                            </div>
-                                        );
-                                    })()
-                                )}
+                                {nutritionModal.entry && (() => {
+                                    const dayTotals = getDayTotals(nutritionModal.entry);
+                                    return (
+                                        <div className="day-totals-modal">
+                                            <strong>Łącznie dzisiaj:</strong> kcal: {dayTotals.calories.toFixed(2)},
+                                            B: {dayTotals.protein.toFixed(2)}g,
+                                            T: {dayTotals.fat.toFixed(2)}g,
+                                            W: {dayTotals.carbs.toFixed(2)}g
+                                        </div>
+                                    );
+                                })()}
 
                                 {nutritionModal.entry.meals.map((meal) => {
                                     const totals = meal.mealProducts.reduce(
@@ -351,9 +425,9 @@ export default function Calendar() {
                                                 <div className="meal-products">
                                                     {meal.mealProducts.map((p) => (
                                                         <div key={p.id} className="meal-product-item">
-                                                        <span>
-                                                            {p.name} - {p.amount}g | kcal: {p.calories.toFixed(2)}, B: {p.protein.toFixed(2)}g, W: {p.carbs.toFixed(2)}g, T: {p.fat.toFixed(2)}g
-                                                        </span>
+                              <span>
+                                {p.name} - {p.amount}g | kcal: {p.calories.toFixed(2)}, B: {p.protein.toFixed(2)}g, W: {p.carbs.toFixed(2)}g, T: {p.fat.toFixed(2)}g
+                              </span>
                                                             <div className="meal-product-actions">
                                                                 <button
                                                                     className="modify-btn"
@@ -374,7 +448,8 @@ export default function Calendar() {
                                                     {/* Podsumowanie kalorii i makrosów */}
                                                     <div className="meal-totals">
                                                         <strong>Łącznie:</strong> {totals.calories.toFixed(2)} kcal |
-                                                        B: {totals.protein.toFixed(2)}g | W: {totals.carbs.toFixed(2)}g | T: {totals.fat.toFixed(2)}g
+                                                        B: {totals.protein.toFixed(2)}g | W: {totals.carbs.toFixed(2)}g
+                                                        | T: {totals.fat.toFixed(2)}g
                                                     </div>
                                                 </div>
                                             ) : (
@@ -396,7 +471,11 @@ export default function Calendar() {
                                                 </button>
                                                 <button
                                                     onClick={() =>
-                                                        console.log(`${meal.description} - produkt użytkownika`)
+                                                        setUserProductModal({
+                                                            open: true,
+                                                            mealId: meal.id,
+                                                            mealType: meal.description,
+                                                        })
                                                     }
                                                 >
                                                     Moje produkty
@@ -408,9 +487,7 @@ export default function Calendar() {
 
                                 <button
                                     className="close-btn"
-                                    onClick={() =>
-                                        setNutritionModal({open: false, date: null, entry: null})
-                                    }
+                                    onClick={() => setNutritionModal({open: false, date: null, entry: null})}
                                 >
                                     Zamknij
                                 </button>
@@ -418,11 +495,11 @@ export default function Calendar() {
                         </div>
                     )}
 
+                    {/* Modal produktów z bazy */}
                     {productModal.open && (
                         <div className="modal-overlay">
                             <div className="modal-content">
                                 <h2>Dodaj produkt - {productModal.mealType}</h2>
-
                                 <input
                                     type="text"
                                     placeholder="Szukaj produktu..."
@@ -430,28 +507,28 @@ export default function Calendar() {
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="search-input"
                                 />
-
                                 <div className="product-list">
                                     {allProducts
-                                        .filter((p) =>
-                                            p.name.toLowerCase().includes(search.toLowerCase())
-                                        )
+                                        .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
                                         .map((p) => (
-                                            <div key={p.id} className="product-item">
-                                            <span>
-                                                {p.name} ({p.calories} kcal / 100g)
-                                            </span>
+                                            <div key={`base-${p.id}`} className="product-item">
+                                                <span>{p.name} ({p.calories} kcal / 100g)</span>
                                                 <input
                                                     type="number"
                                                     placeholder="ilość (g)"
-                                                    value={amounts[p.id] || ""}
+                                                    value={amounts[`base-${p.id}`] || ""}
                                                     onChange={(e) =>
-                                                        setAmounts({...amounts, [p.id]: e.target.value})
+                                                        setAmounts({ ...amounts, [`base-${p.id}`]: e.target.value })
                                                     }
                                                 />
                                                 <button
                                                     onClick={() =>
-                                                        handleAddProduct(productModal.mealId, p.id, amounts[p.id], nutritionModal.date)
+                                                        handleAddProduct(
+                                                            productModal.mealId,
+                                                            p.id,
+                                                            amounts[`base-${p.id}`],
+                                                            nutritionModal.date
+                                                        )
                                                     }
                                                 >
                                                     Dodaj
@@ -459,15 +536,115 @@ export default function Calendar() {
                                             </div>
                                         ))}
                                 </div>
+                                <button className="close-btn" onClick={() => setProductModal({open: false, mealId: null, mealType: null})}>Zamknij</button>
+                            </div>
+                        </div>
+                    )}
 
-                                <button
-                                    className="close-btn"
-                                    onClick={() =>
-                                        setProductModal({open: false, mealId: null, mealType: null})
-                                    }
-                                >
-                                    Zamknij
-                                </button>
+                    {/* Modal user-products */}
+                    {userProductModal.open && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h2>Moje produkty</h2>
+                                {allUserProducts.length === 0 ? (
+                                    <div className="no-products"><p>Nie masz jeszcze własnych produktów</p></div>
+                                ) : (
+                                    <>
+                                        <input
+                                            type="text"
+                                            placeholder="Szukaj w moich produktach..."
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            className="search-input"
+                                        />
+                                        <div className="product-list">
+                                            {allUserProducts
+                                                .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+                                                .map((p) => (
+                                                    <div key={`user-${p.id}`} className="product-item">
+                                                        <span>{p.name} ({p.calories} kcal / 100g)</span>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="ilość (g)"
+                                                            value={amounts[`user-${p.id}`] || ""}
+                                                            onChange={(e) =>
+                                                                setAmounts({ ...amounts, [`user-${p.id}`]: e.target.value })
+                                                            }
+                                                        />
+                                                        <button
+                                                            onClick={() =>
+                                                                handleAddProduct(
+                                                                    userProductModal.mealId,
+                                                                    p.id, // <-- zawsze używaj p.id
+                                                                    amounts[`user-${p.id}`],
+                                                                    nutritionModal.date
+                                                                )
+                                                            }
+                                                        >
+                                                            Dodaj
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </>
+                                )}
+                                <div className="meal-buttons">
+                                    <button onClick={() => setAddUserProductModal({ open: true })}>
+                                        Dodaj nowy produkt
+                                    </button>
+                                </div>
+                                <button className="close-btn" onClick={() => setUserProductModal({ open: false, mealId: null, mealType: null })}>Zamknij</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Modal dodawania własnego produktu */}
+                    {addUserProductModal.open && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h2>Dodaj własny produkt</h2>
+
+                                <input
+                                    type="text"
+                                    placeholder="Nazwa produktu"
+                                    value={newUserProduct.name}
+                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, name: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Białko (g/100g)"
+                                    value={newUserProduct.protein}
+                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, protein: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Węglowodany (g/100g)"
+                                    value={newUserProduct.carbs}
+                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, carbs: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Tłuszcz (g/100g)"
+                                    value={newUserProduct.fat}
+                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, fat: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Kalorie (kcal/100g)"
+                                    value={newUserProduct.calories}
+                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, calories: e.target.value })}
+                                    className="search-input"
+                                />
+                                    <div className="meal-buttons">
+                                        <button className="modify-btn" onClick={handleSaveUserProduct}>Zapisz</button>
+                                    </div>
+                                    <button className="close-btn" onClick={() => setAddUserProductModal({ open: false })}>
+                                        Anuluj
+                                    </button>
                             </div>
                         </div>
                     )}
@@ -479,7 +656,6 @@ export default function Calendar() {
                         ▶
                     </button>
                 </div>
-
                 {/* Nagłówki dni tygodnia */}
                 <div className="calendar-weekdays">
                     {weekDays.map((wd) => (
@@ -513,17 +689,15 @@ export default function Calendar() {
                                     ) : (
                                         <div className="entry-empty rest">Odpoczynek</div>
                                     )}
-                                    {entry && entry.meals && entry.meals.length > 0 && (
-                                        (() => {
-                                            const totals = getDayTotals(entry);
-                                            return (
-                                                <div className="day-totals">
-                                                    kcal: {totals.calories.toFixed(2)}, B: {totals.protein.toFixed(2)}g,
-                                                    W: {totals.carbs.toFixed(2)}g, T: {totals.fat.toFixed(2)}g
-                                                </div>
-                                            );
-                                        })()
-                                    )}
+                                    {entry && entry.meals && entry.meals.length > 0 && (() => {
+                                        const totals = getDayTotals(entry);
+                                        return (
+                                            <div className="day-totals">
+                                                kcal: {totals.calories.toFixed(2)}, B: {totals.protein.toFixed(2)}g,
+                                                W: {totals.carbs.toFixed(2)}g, T: {totals.fat.toFixed(2)}g
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
 
                                 <div className="day-actions">

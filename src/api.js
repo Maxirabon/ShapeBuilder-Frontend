@@ -161,6 +161,34 @@ export async function deleteMealProduct(mealProductId) {
     return await res.json();
 }
 
+export async function getUserProducts() {
+    const res = await fetch(`${API_URL}/user/getUserProducts`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało sie pobrac produktow uzytkownika");
+    }
+    return await res.json();
+}
+
+export async function addUserProduct(product) {
+    const res = await fetch(`${API_URL}/user/addUserProduct`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(product)
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało sie dodac produktu uzytkownika");
+    }
+    const data = await res.json();
+    return data;
+}
+
 /**
  * Pobranie podsumowania dziennego (z posiłkami i produktami)
  * @param {number} dayId - id dnia (calendarId z backendu)
