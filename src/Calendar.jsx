@@ -145,6 +145,20 @@ export default function Calendar() {
     const goPrev = () => setCurrentMonth(new Date(year, monthIndex - 1, 1));
     const goNext = () => setCurrentMonth(new Date(year, monthIndex + 1, 1));
 
+    function calculateDayTotals(entry) {
+        if (!entry || !entry.meals) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+        return entry.meals.reduce((acc, meal) => {
+            meal.mealProducts.forEach(p => {
+                acc.calories += p.calories;
+                acc.protein += p.protein;
+                acc.carbs += p.carbs;
+                acc.fat += p.fat;
+            });
+            return acc;
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    }
+
     const handleAddProduct = async (mealId, productId, amount) => {
         const parsedAmount = Number(amount);
         if (!parsedAmount || parsedAmount <= 0) {
@@ -263,33 +277,6 @@ export default function Calendar() {
                                 Zapotrzebowanie dzienne: {CaloricRequisition} kcal
                             </div>
                         )}
-
-                        <div className="daily-totals">
-                            {nutritionModal.entry && nutritionModal.entry.meals && nutritionModal.entry.meals.length > 0 ? (() => {
-                                const dailyTotals = nutritionModal.entry.meals.reduce(
-                                    (acc, meal) => {
-                                        meal.mealProducts.forEach(p => {
-                                            acc.calories += p.calories;
-                                            acc.protein += p.protein;
-                                            acc.carbs += p.carbs;
-                                            acc.fat += p.fat;
-                                        });
-                                        return acc;
-                                    },
-                                    { calories: 0, protein: 0, carbs: 0, fat: 0 }
-                                );
-                                return (
-                                    <>
-                                        Dzienne spożycie: {dailyTotals.calories} kcal |
-                                        B: {dailyTotals.protein}g |
-                                        W: {dailyTotals.carbs}g |
-                                        T: {dailyTotals.fat}g
-                                    </>
-                                );
-                            })() : (
-                                <>Dzienne spożycie: 0 kcal | B: 0g | W: 0g | T: 0g</>
-                            )}
-                        </div>
                     </div>
                 </div>
             )}
@@ -301,6 +288,20 @@ export default function Calendar() {
                         <div className="modal-overlay">
                             <div className="modal-content">
                                 <h2>Dodaj posiłek - {formatYYYYMMDD(nutritionModal.date)}</h2>
+
+                                {nutritionModal.entry && (
+                                    (() => {
+                                        const dayTotals = calculateDayTotals(nutritionModal.entry);
+                                        return (
+                                            <div className="day-totals-modal">
+                                                <strong>Łącznie dzisiaj:</strong> kcal: {dayTotals.calories.toFixed(2)},
+                                                B: {dayTotals.protein.toFixed(2)}g,
+                                                T: {dayTotals.fat.toFixed(2)}g,
+                                                W: {dayTotals.carbs.toFixed(2)}g
+                                            </div>
+                                        );
+                                    })()
+                                )}
 
                                 {nutritionModal.entry.meals.map((meal) => {
                                     const totals = meal.mealProducts.reduce(
@@ -488,6 +489,17 @@ export default function Calendar() {
                                         <div className="entry-indicator training">Dzień treningowy</div>
                                     ) : (
                                         <div className="entry-empty rest">Odpoczynek</div>
+                                    )}
+                                    {entry && entry.meals && entry.meals.length > 0 && (
+                                        (() => {
+                                            const totals = calculateDayTotals(entry);
+                                            return (
+                                                <div className="day-totals">
+                                                    kcal: {totals.calories.toFixed(2)}, B: {totals.protein.toFixed(2)}g,
+                                                    W: {totals.carbs.toFixed(2)}g, T: {totals.fat.toFixed(2)}g
+                                                </div>
+                                            );
+                                        })()
                                     )}
                                 </div>
 
