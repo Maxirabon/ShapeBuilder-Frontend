@@ -145,10 +145,9 @@ export default function Calendar() {
     const goPrev = () => setCurrentMonth(new Date(year, monthIndex - 1, 1));
     const goNext = () => setCurrentMonth(new Date(year, monthIndex + 1, 1));
 
-    function calculateDayTotals(entry) {
-        if (!entry || !entry.meals) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-
-        return entry.meals.reduce((acc, meal) => {
+    function getDayTotals(day) {
+        if (!day || !day.meals) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        return day.meals.reduce((acc, meal) => {
             meal.mealProducts.forEach(p => {
                 acc.calories += p.calories;
                 acc.protein += p.protein;
@@ -159,51 +158,45 @@ export default function Calendar() {
         }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
     }
 
-    const handleAddProduct = async (mealId, productId, amount) => {
+    const handleAddProduct = async (mealId, productId, amount, date) => {
         const parsedAmount = Number(amount);
         if (!parsedAmount || parsedAmount <= 0) {
             alert("Podaj poprawną ilość produktu");
             return;
         }
-        console.log({meal_id: mealId, product_id: productId, amount: parsedAmount});
+
         try {
             const updatedMeal = await addMealProduct(mealId, productId, parsedAmount);
-            setNutritionModal((prev) => {
-                if (!prev.entry) return prev;
 
-                const meals = prev.entry.meals.map((meal) =>
+            // Aktualizacja modala
+            setNutritionModal(prev => {
+                if (!prev.entry) return prev;
+                const meals = prev.entry.meals.map(meal =>
                     meal.id === updatedMeal.id ? updatedMeal : meal
                 );
-                return {
-                    ...prev,
-                    entry: {
-                        ...prev.entry,
-                        meals,
-                    },
-                };
+                return { ...prev, entry: { ...prev.entry, meals } };
             });
-            setRawDays((prevDays) => {
-                const key = formatYYYYMMDD(nutritionModal.date);
-                return prevDays.map((day) =>
-                    formatYYYYMMDD(parseDateFromServer(day)) === key
-                        ? {
-                            ...day,
-                            meals: day.meals.map((meal) =>
-                                meal.id === updatedMeal.id ? updatedMeal : meal
-                            ),
-                        }
-                        : day
-                );
-            });
-            setAmounts((prev) => ({...prev, [productId]: ""}));
+
+            // Aktualizacja rawDays
+            setRawDays(prevDays =>
+                prevDays.map(day => {
+                    if (formatYYYYMMDD(parseDateFromServer(day)) !== formatYYYYMMDD(date)) return day;
+                    return {
+                        ...day,
+                        meals: day.meals.map(meal =>
+                            meal.id === updatedMeal.id ? updatedMeal : meal
+                        ),
+                    };
+                })
+            );
+
+            setAmounts(prev => ({ ...prev, [productId]: "" }));
         } catch (error) {
             alert(error.message || "Nie udało się dodać produktu");
         }
     };
 
-    const handleModifyProduct = async (mealId, mealProductId, productId, currentAmount) => {
-        console.log("handleModifyProduct called", {mealId, mealProductId, productId, currentAmount});
-
+    const handleModifyProduct = async (mealId, mealProductId, productId, currentAmount, date) => {
         const newAmount = prompt("Podaj nową ilość (g)", currentAmount);
         const parsedAmount = Number(newAmount);
 
@@ -213,11 +206,9 @@ export default function Calendar() {
         }
 
         try {
-            console.log("Wywołanie updateMealProduct", {mealProductId, productId, parsedAmount});
-
-            // <-- przypisanie odpowiedzi backendu do zmiennej
             const updatedProduct = await updateMealProduct(mealProductId, productId, parsedAmount);
 
+            // Aktualizacja modala
             setNutritionModal(prev => {
                 if (!prev.entry) return prev;
                 const meals = prev.entry.meals.map(meal =>
@@ -230,22 +221,42 @@ export default function Calendar() {
                         }
                         : meal
                 );
-                return {...prev, entry: {...prev.entry, meals}};
+                return { ...prev, entry: { ...prev.entry, meals } };
             });
 
+            // Aktualizacja rawDays
+            setRawDays(prevDays =>
+                prevDays.map(day => {
+                    if (formatYYYYMMDD(parseDateFromServer(day)) !== formatYYYYMMDD(date)) return day;
+                    return {
+                        ...day,
+                        meals: day.meals.map(meal =>
+                            meal.id === mealId
+                                ? {
+                                    ...meal,
+                                    mealProducts: meal.mealProducts.map(p =>
+                                        p.id === mealProductId ? updatedProduct : p
+                                    ),
+                                }
+                                : meal
+                        ),
+                    };
+                })
+            );
         } catch (error) {
-            console.error("Błąd updateMealProduct:", error);
-            alert(error.message);
+            alert(error.message || "Nie udało się zmodyfikować produktu");
         }
     };
 
-    const handleDeleteProduct = async (mealId, mealProductId) => {
+    const handleDeleteProduct = async (mealId, mealProductId, date) => {
         if (!window.confirm("Czy na pewno chcesz usunąć ten produkt?")) return;
+
         try {
             const deleted = await deleteMealProduct(mealProductId);
+
+            // Aktualizacja modala
             setNutritionModal(prev => {
                 if (!prev.entry) return prev;
-
                 const meals = prev.entry.meals.map(meal =>
                     meal.id === mealId
                         ? {
@@ -254,12 +265,28 @@ export default function Calendar() {
                         }
                         : meal
                 );
-
-                return {...prev, entry: {...prev.entry, meals}};
+                return { ...prev, entry: { ...prev.entry, meals } };
             });
 
+            // Aktualizacja rawDays
+            setRawDays(prevDays =>
+                prevDays.map(day => {
+                    if (formatYYYYMMDD(parseDateFromServer(day)) !== formatYYYYMMDD(date)) return day;
+                    return {
+                        ...day,
+                        meals: day.meals.map(meal =>
+                            meal.id === mealId
+                                ? {
+                                    ...meal,
+                                    mealProducts: meal.mealProducts.filter(p => p.id !== deleted.id),
+                                }
+                                : meal
+                        ),
+                    };
+                })
+            );
         } catch (error) {
-            alert(error.message);
+            alert(error.message || "Nie udało się usunąć produktu");
         }
     };
 
@@ -291,7 +318,7 @@ export default function Calendar() {
 
                                 {nutritionModal.entry && (
                                     (() => {
-                                        const dayTotals = calculateDayTotals(nutritionModal.entry);
+                                        const dayTotals = getDayTotals(nutritionModal.entry);
                                         return (
                                             <div className="day-totals-modal">
                                                 <strong>Łącznie dzisiaj:</strong> kcal: {dayTotals.calories.toFixed(2)},
@@ -330,13 +357,13 @@ export default function Calendar() {
                                                             <div className="meal-product-actions">
                                                                 <button
                                                                     className="modify-btn"
-                                                                    onClick={() => handleModifyProduct(meal.id, p.id, p.productId, p.amount)}
+                                                                    onClick={() => handleModifyProduct(meal.id, p.id, p.productId, p.amount, nutritionModal.date)}
                                                                 >
                                                                     Modyfikuj
                                                                 </button>
                                                                 <button
                                                                     className="delete-btn"
-                                                                    onClick={() => handleDeleteProduct(meal.id, p.id)}
+                                                                    onClick={() => handleDeleteProduct(meal.id, p.id, nutritionModal.date)}
                                                                 >
                                                                     Usuń
                                                                 </button>
@@ -424,11 +451,7 @@ export default function Calendar() {
                                                 />
                                                 <button
                                                     onClick={() =>
-                                                        handleAddProduct(
-                                                            productModal.mealId,
-                                                            p.id,
-                                                            amounts[p.id]
-                                                        )
+                                                        handleAddProduct(productModal.mealId, p.id, amounts[p.id], nutritionModal.date)
                                                     }
                                                 >
                                                     Dodaj
@@ -492,7 +515,7 @@ export default function Calendar() {
                                     )}
                                     {entry && entry.meals && entry.meals.length > 0 && (
                                         (() => {
-                                            const totals = calculateDayTotals(entry);
+                                            const totals = getDayTotals(entry);
                                             return (
                                                 <div className="day-totals">
                                                     kcal: {totals.calories.toFixed(2)}, B: {totals.protein.toFixed(2)}g,
