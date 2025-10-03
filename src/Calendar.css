@@ -15,21 +15,22 @@ body {
     min-height: calc(100vh - var(--navbar-height) - 40px);
 }
 
-/* górny blok z imieniem użytkownika */
 .calendar-topline {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: 24px;
     margin-bottom: 12px;
+    flex-wrap: nowrap; /* upewniamy się, że nic nie zawija */
 }
 
 .calendar-user {
     margin: 0;
     font-size: 20px;
+    white-space: nowrap; /* nie zawija tekstu */
 }
 
-.calendar-calories {
-    margin: 0;
+.calendar-calories, .daily-totals {
     font-weight: bold;
     font-size: 20px;
 }
@@ -303,6 +304,12 @@ body {
     background-color: #dc2626;
     border-color: #dc2626;
     color: #fff;
+}
+
+.meal-totals {
+    margin-top: 8px;
+    font-weight: bold;
+    color: #333;
 }
 
 /* Przyciski posiłku pod listą produktów */

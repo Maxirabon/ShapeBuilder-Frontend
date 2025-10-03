@@ -188,7 +188,7 @@ export default function Calendar() {
     };
 
     const handleModifyProduct = async (mealId, mealProductId, productId, currentAmount) => {
-        console.log("handleModifyProduct called", { mealId, mealProductId, productId, currentAmount });
+        console.log("handleModifyProduct called", {mealId, mealProductId, productId, currentAmount});
 
         const newAmount = prompt("Podaj nową ilość (g)", currentAmount);
         const parsedAmount = Number(newAmount);
@@ -199,7 +199,7 @@ export default function Calendar() {
         }
 
         try {
-            console.log("Wywołanie updateMealProduct", { mealProductId, productId, parsedAmount });
+            console.log("Wywołanie updateMealProduct", {mealProductId, productId, parsedAmount});
 
             // <-- przypisanie odpowiedzi backendu do zmiennej
             const updatedProduct = await updateMealProduct(mealProductId, productId, parsedAmount);
@@ -216,7 +216,7 @@ export default function Calendar() {
                         }
                         : meal
                 );
-                return { ...prev, entry: { ...prev.entry, meals } };
+                return {...prev, entry: {...prev.entry, meals}};
             });
 
         } catch (error) {
@@ -241,7 +241,7 @@ export default function Calendar() {
                         : meal
                 );
 
-                return { ...prev, entry: { ...prev.entry, meals } };
+                return {...prev, entry: {...prev.entry, meals}};
             });
 
         } catch (error) {
@@ -256,11 +256,41 @@ export default function Calendar() {
                     <h2 className="calendar-user">
                         {user.firstName} {user.lastName}
                     </h2>
-                    {CaloricRequisition !== null && (
-                        <div className="calendar-calories">
-                            Zapotrzebowanie dzienne: {CaloricRequisition} kcal
+
+                    <div className="calories-calories">
+                        {CaloricRequisition !== null && (
+                            <div className="calendar-calories">
+                                Zapotrzebowanie dzienne: {CaloricRequisition} kcal
+                            </div>
+                        )}
+
+                        <div className="daily-totals">
+                            {nutritionModal.entry && nutritionModal.entry.meals && nutritionModal.entry.meals.length > 0 ? (() => {
+                                const dailyTotals = nutritionModal.entry.meals.reduce(
+                                    (acc, meal) => {
+                                        meal.mealProducts.forEach(p => {
+                                            acc.calories += p.calories;
+                                            acc.protein += p.protein;
+                                            acc.carbs += p.carbs;
+                                            acc.fat += p.fat;
+                                        });
+                                        return acc;
+                                    },
+                                    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+                                );
+                                return (
+                                    <>
+                                        Dzienne spożycie: {dailyTotals.calories} kcal |
+                                        B: {dailyTotals.protein}g |
+                                        W: {dailyTotals.carbs}g |
+                                        T: {dailyTotals.fat}g
+                                    </>
+                                );
+                            })() : (
+                                <>Dzienne spożycie: 0 kcal | B: 0g | W: 0g | T: 0g</>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
             )}
 
@@ -272,16 +302,29 @@ export default function Calendar() {
                             <div className="modal-content">
                                 <h2>Dodaj posiłek - {formatYYYYMMDD(nutritionModal.date)}</h2>
 
-                                {nutritionModal.entry.meals.map((meal) => (
-                                    <div key={meal.id} className="meal-section">
-                                        <h3>{meal.description}</h3>
-                                        {/* Lista produktów */}
-                                        {meal.mealProducts && meal.mealProducts.length > 0 ? (
-                                            <div className="meal-products">
-                                                {meal.mealProducts.map((p) => (
-                                                    <div key={p.id} className="meal-product-item">
+                                {nutritionModal.entry.meals.map((meal) => {
+                                    const totals = meal.mealProducts.reduce(
+                                        (acc, p) => {
+                                            acc.calories += p.calories;
+                                            acc.protein += p.protein;
+                                            acc.carbs += p.carbs;
+                                            acc.fat += p.fat;
+                                            return acc;
+                                        },
+                                        {calories: 0, protein: 0, carbs: 0, fat: 0}
+                                    );
+
+                                    return (
+                                        <div key={meal.id} className="meal-section">
+                                            <h3>{meal.description}</h3>
+
+                                            {/* Lista produktów */}
+                                            {meal.mealProducts && meal.mealProducts.length > 0 ? (
+                                                <div className="meal-products">
+                                                    {meal.mealProducts.map((p) => (
+                                                        <div key={p.id} className="meal-product-item">
                                                         <span>
-                                                            {p.name} - {p.amount}g | kcal: {p.calories}, B: {p.protein}g, W: {p.carbs}g, T: {p.fat}g
+                                                            {p.name} - {p.amount}g | kcal: {p.calories.toFixed(2)}, B: {p.protein.toFixed(2)}g, W: {p.carbs.toFixed(2)}g, T: {p.fat.toFixed(2)}g
                                                         </span>
                                                             <div className="meal-product-actions">
                                                                 <button
@@ -297,36 +340,43 @@ export default function Calendar() {
                                                                     Usuń
                                                                 </button>
                                                             </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="no-products">Brak produktów</div>
-                                        )}
+                                                        </div>
+                                                    ))}
 
-                                        {/* Przyciski posiłku pod listą produktów */}
-                                        <div className="meal-buttons">
-                                            <button
-                                                onClick={() =>
-                                                    setProductModal({
-                                                        open: true,
-                                                        mealId: meal.id,
-                                                        mealType: meal.description,
-                                                    })
-                                                }
-                                            >
-                                                Dodaj produkt
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    console.log(`${meal.description} - produkt użytkownika`)
-                                                }
-                                            >
-                                                Moje produkty
-                                            </button>
+                                                    {/* Podsumowanie kalorii i makrosów */}
+                                                    <div className="meal-totals">
+                                                        <strong>Łącznie:</strong> {totals.calories.toFixed(2)} kcal |
+                                                        B: {totals.protein.toFixed(2)}g | W: {totals.carbs.toFixed(2)}g | T: {totals.fat.toFixed(2)}g
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="no-products">Brak produktów</div>
+                                            )}
+
+                                            {/* Przyciski posiłku pod listą produktów */}
+                                            <div className="meal-buttons">
+                                                <button
+                                                    onClick={() =>
+                                                        setProductModal({
+                                                            open: true,
+                                                            mealId: meal.id,
+                                                            mealType: meal.description,
+                                                        })
+                                                    }
+                                                >
+                                                    Dodaj produkt
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        console.log(`${meal.description} - produkt użytkownika`)
+                                                    }
+                                                >
+                                                    Moje produkty
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
 
                                 <button
                                     className="close-btn"
@@ -360,9 +410,9 @@ export default function Calendar() {
                                         )
                                         .map((p) => (
                                             <div key={p.id} className="product-item">
-                            <span>
-                                {p.name} ({p.calories} kcal / 100g)
-                            </span>
+                                            <span>
+                                                {p.name} ({p.calories} kcal / 100g)
+                                            </span>
                                                 <input
                                                     type="number"
                                                     placeholder="ilość (g)"
@@ -462,5 +512,4 @@ export default function Calendar() {
             </div>
         </div>
     );
-
 }
