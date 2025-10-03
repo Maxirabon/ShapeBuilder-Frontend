@@ -120,7 +120,44 @@ export async function addMealProduct(meal_id, product_id, amount) {
         body: JSON.stringify({ meal_id, product_id, amount }),
     });
 
-    if (!res.ok) throw new Error("Błąd dodawania produktu do posiłku");
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się dodać produktu");
+    }
+
+    return await res.json();
+}
+
+export async function updateMealProduct(mealProductId, productId, amount) {
+    console.log("API updateMealProduct called", { mealProductId, productId, amount });
+
+    const res = await fetch(`${API_URL}/user/updateMealProduct`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ id: mealProductId, product_id: productId, amount }),
+    });
+
+    console.log("Response status:", res.status);
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Response errorData:", errorData);
+        throw new Error(errorData.error || "Nie udało się zmodyfikować produktu");
+    }
+    return await res.json();
+}
+
+export async function deleteMealProduct(mealProductId) {
+    const res = await fetch(`${API_URL}/user/deleteMealProduct?id=${mealProductId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się usunąć produktu");
+    }
+
     return await res.json();
 }
 

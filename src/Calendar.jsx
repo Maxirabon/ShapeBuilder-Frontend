@@ -1,6 +1,12 @@
-
 import React, {useEffect, useMemo, useState} from "react";
-import {addMealProduct, getAllProducts, getUserCaloricRequisition, getUserDays} from "./api";
+import {
+    addMealProduct,
+    deleteMealProduct,
+    getAllProducts,
+    getUserCaloricRequisition,
+    getUserDays,
+    updateMealProduct
+} from "./api";
 import "./Calendar.css";
 
 /**
@@ -141,25 +147,19 @@ export default function Calendar() {
 
     const handleAddProduct = async (mealId, productId, amount) => {
         const parsedAmount = Number(amount);
-
         if (!parsedAmount || parsedAmount <= 0) {
             alert("Podaj poprawną ilość produktu");
             return;
         }
-
         console.log({meal_id: mealId, product_id: productId, amount: parsedAmount});
-
         try {
             const updatedMeal = await addMealProduct(mealId, productId, parsedAmount);
-
-            // Aktualizacja stanu nutritionModal w bezpieczny sposób
             setNutritionModal((prev) => {
                 if (!prev.entry) return prev;
 
                 const meals = prev.entry.meals.map((meal) =>
                     meal.id === updatedMeal.id ? updatedMeal : meal
                 );
-
                 return {
                     ...prev,
                     entry: {
@@ -168,7 +168,6 @@ export default function Calendar() {
                     },
                 };
             });
-
             setRawDays((prevDays) => {
                 const key = formatYYYYMMDD(nutritionModal.date);
                 return prevDays.map((day) =>
@@ -182,12 +181,71 @@ export default function Calendar() {
                         : day
                 );
             });
-
-            // Czyszczenie pola ilości dla tego produktu
             setAmounts((prev) => ({...prev, [productId]: ""}));
         } catch (error) {
-            console.error("Błąd podczas dodawania produktu:", error);
             alert(error.message || "Nie udało się dodać produktu");
+        }
+    };
+
+    const handleModifyProduct = async (mealId, mealProductId, productId, currentAmount) => {
+        console.log("handleModifyProduct called", { mealId, mealProductId, productId, currentAmount });
+
+        const newAmount = prompt("Podaj nową ilość (g)", currentAmount);
+        const parsedAmount = Number(newAmount);
+
+        if (!parsedAmount || parsedAmount <= 0) {
+            alert("Podaj poprawną ilość produktu");
+            return;
+        }
+
+        try {
+            console.log("Wywołanie updateMealProduct", { mealProductId, productId, parsedAmount });
+
+            // <-- przypisanie odpowiedzi backendu do zmiennej
+            const updatedProduct = await updateMealProduct(mealProductId, productId, parsedAmount);
+
+            setNutritionModal(prev => {
+                if (!prev.entry) return prev;
+                const meals = prev.entry.meals.map(meal =>
+                    meal.id === mealId
+                        ? {
+                            ...meal,
+                            mealProducts: meal.mealProducts.map(p =>
+                                p.id === mealProductId ? updatedProduct : p
+                            ),
+                        }
+                        : meal
+                );
+                return { ...prev, entry: { ...prev.entry, meals } };
+            });
+
+        } catch (error) {
+            console.error("Błąd updateMealProduct:", error);
+            alert(error.message);
+        }
+    };
+
+    const handleDeleteProduct = async (mealId, mealProductId) => {
+        if (!window.confirm("Czy na pewno chcesz usunąć ten produkt?")) return;
+        try {
+            const deleted = await deleteMealProduct(mealProductId);
+            setNutritionModal(prev => {
+                if (!prev.entry) return prev;
+
+                const meals = prev.entry.meals.map(meal =>
+                    meal.id === mealId
+                        ? {
+                            ...meal,
+                            mealProducts: meal.mealProducts.filter(p => p.id !== deleted.id),
+                        }
+                        : meal
+                );
+
+                return { ...prev, entry: { ...prev.entry, meals } };
+            });
+
+        } catch (error) {
+            alert(error.message);
         }
     };
 
@@ -222,9 +280,23 @@ export default function Calendar() {
                                             <div className="meal-products">
                                                 {meal.mealProducts.map((p) => (
                                                     <div key={p.id} className="meal-product-item">
-                    <span>
-                        {p.name} - {p.amount}g | kcal: {p.calories}, B: {p.protein}g, W: {p.carbs}g, T: {p.fat}g
-                    </span>
+                                                        <span>
+                                                            {p.name} - {p.amount}g | kcal: {p.calories}, B: {p.protein}g, W: {p.carbs}g, T: {p.fat}g
+                                                        </span>
+                                                            <div className="meal-product-actions">
+                                                                <button
+                                                                    className="modify-btn"
+                                                                    onClick={() => handleModifyProduct(meal.id, p.id, p.productId, p.amount)}
+                                                                >
+                                                                    Modyfikuj
+                                                                </button>
+                                                                <button
+                                                                    className="delete-btn"
+                                                                    onClick={() => handleDeleteProduct(meal.id, p.id)}
+                                                                >
+                                                                    Usuń
+                                                                </button>
+                                                            </div>
                                                     </div>
                                                 ))}
                                             </div>

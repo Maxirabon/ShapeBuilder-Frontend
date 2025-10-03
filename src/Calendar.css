@@ -172,7 +172,7 @@ body {
 
 .modal-overlay {
     position: fixed;
-    top: 0;
+    top: 22px;
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -207,6 +207,7 @@ body {
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
+    border-bottom: 3px solid #9edaa6;
 }
 
 .meal-section h3 {
@@ -272,6 +273,36 @@ body {
 /* Hover całego wiersza produktu */
 .meal-product-item:hover {
     background-color: #f0fdf0;
+}
+
+.meal-product-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.meal-product-actions button {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: lightgrey;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    color: #000;
+}
+
+/* hover dla modyfikuj */
+.meal-product-actions .modify-btn:hover {
+    background-color: #34eb4f;
+    border-color: #34eb4f;
+    color: #fff;
+}
+
+/* hover dla usuń */
+.meal-product-actions .delete-btn:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
 }
 
 /* Przyciski posiłku pod listą produktów */
