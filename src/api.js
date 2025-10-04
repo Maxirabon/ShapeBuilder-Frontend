@@ -189,6 +189,34 @@ export async function addUserProduct(product) {
     return data;
 }
 
+export async function modifyUserProduct(product) {
+    const res = await fetch(`${API_URL}/user/updateUserProduct`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(product)
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało sie zaktualizować produktu uzytkownika");
+    }
+    const data = await res.json();
+    return data;
+}
+
+export async function deleteUserProduct(productId) {
+    const res = await fetch(`${API_URL}/user/deleteUserProduct/${productId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się usunąć produktu");
+    }
+    return await res.text();
+}
+
 /**
  * Pobranie podsumowania dziennego (z posiłkami i produktami)
  * @param {number} dayId - id dnia (calendarId z backendu)

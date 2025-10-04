@@ -1,3 +1,4 @@
+/* === GLOBAL === */
 :root {
     --navbar-height: 64px; /* domyślna wysokość navbaru */
 }
@@ -6,16 +7,15 @@ body {
     background-color: #e6f9e6;
 }
 
-/* całe tło sekcji pod navbar */
+/* === KALENDARZ === */
 .calendar-container {
     padding: calc(var(--navbar-height) + 20px) 20px 40px 20px;
-    max-width: 1800px; /* lekko szersza sekcja */
+    max-width: 1800px;
     margin: 0 auto;
     box-sizing: border-box;
     min-height: calc(100vh - var(--navbar-height) - 40px);
 }
 
-/* górny blok z imieniem użytkownika */
 .calendar-topline {
     display: flex;
     justify-content: space-between;
@@ -23,26 +23,19 @@ body {
     margin-bottom: 12px;
 }
 
-.calendar-user {
-    margin: 0;
-    font-size: 20px;
-}
-
+.calendar-user,
 .calendar-calories {
-    font-weight: bold;
     font-size: 20px;
-    margin-right: 0px;
+    font-weight: bold;
 }
 
-/* karta z miesiącem */
 .calendar-card {
-    background: #f5f5f5; /* lekko szare tło tabeli */
+    background: #f5f5f5;
     border-radius: 12px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     padding: 16px;
 }
 
-/* header miesiąca z przyciskami */
 .calendar-header {
     display: flex;
     align-items: center;
@@ -64,7 +57,6 @@ body {
     cursor: pointer;
 }
 
-/* nagłówki dni tygodnia */
 .calendar-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -80,15 +72,13 @@ body {
     border-bottom: 2px solid #f0f0f0;
 }
 
-/* siatka dni */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 10px;
-    justify-items: stretch; /* wyrównanie do szerokości kolumn */
+    justify-items: stretch;
 }
 
-/* pojedyncza kratka dnia */
 .calendar-day {
     background: #fff;
     border: 1px solid #e0e0e0;
@@ -150,19 +140,17 @@ body {
     border: 1px solid #ccc;
     background: #fafafa;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; /* animacja hover */
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/* przycisk Żywienie */
 .day-btn.nutrition:hover {
     background-color: #34eb4f;
     color: #fff;
     border-color: #34eb4f;
 }
 
-/* przycisk Trening */
 .day-btn.training:hover {
-    background-color: #000000;
+    background-color: #000;
     color: #fff;
     border-color: #ccc;
 }
@@ -172,6 +160,29 @@ body {
     text-align: center;
 }
 
+.day-totals {
+    margin-top: 4px;
+    font-size: 0.71rem;
+    color: #333;
+    background-color: #f3f3f3;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1.2;
+}
+
+.day-totals-modal {
+    margin: 8px 0 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #222;
+    background-color: #e9f5ff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* === MODALE OGÓLNE === */
 .modal-overlay {
     position: fixed;
     top: 22px;
@@ -186,30 +197,6 @@ body {
     overflow-y: auto;
     padding: 20px 0;
 }
-
-.day-totals {
-    margin-top: 4px;
-    font-size: 0.71rem;
-    color: #333;
-    background-color: #f3f3f3;
-    padding: 2px 6px;
-    border-radius: 4px;
-    line-height: 1.2;
-}
-
-/* --- Podsumowanie dnia w modalu --- */
-.day-totals-modal {
-    margin: 8px 0 12px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #222;
-    background-color: #e9f5ff;
-    padding: 6px 10px;
-    border-radius: 6px;
-    display: inline-block;
-    text-align: center;
-}
-
 
 .modal-content {
     background: #fff;
@@ -228,7 +215,24 @@ body {
     text-align: center;
 }
 
-/* Sekcja posiłku */
+.close-btn {
+    display: block;
+    margin: 20px auto 0 auto;
+    background: lightgrey;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.close-btn:hover {
+    background: #dc2626;
+    color: black;
+}
+
+/* === MODAL: ŻYWIENIE/TRENING === */
 .meal-section {
     background: #f5f5f5;
     border-radius: 12px;
@@ -241,14 +245,12 @@ body {
 }
 
 .meal-section h3 {
-    margin-top: 0;
-    margin-bottom: 12px;
+    margin: 0 0 12px;
     font-size: 18px;
     font-weight: 600;
     text-align: center;
 }
 
-/* Lista produktów w posiłku */
 .meal-products {
     display: flex;
     flex-direction: column;
@@ -256,13 +258,12 @@ body {
     margin-bottom: 12px;
 }
 
-/* Pojedynczy produkt w posiłku */
 .meal-product-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    background: #ffffff;
+    background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
@@ -271,20 +272,14 @@ body {
     box-sizing: border-box;
 }
 
-/* Tekst produktu (nazwa i wartości odżywcze) */
 .meal-product-item span {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     color: #333;
-    flex: 1; /* zajmuje całą dostępną przestrzeń, przyciski nie wypychają */
+    flex: 1;
 }
 
-.meal-product-item span b {
-    font-weight: 600;
-}
-
-/* Opcjonalny przycisk przy produkcie */
 .meal-product-item button {
     background-color: #34eb4f;
     color: #fff;
@@ -293,16 +288,11 @@ body {
     border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
-    margin-left: 8px; /* odsuwa od tekstu */
+    margin-left: 8px;
 }
 
 .meal-product-item button:hover {
     background-color: #2cbf43;
-}
-
-/* Hover całego wiersza produktu */
-.meal-product-item:hover {
-    background-color: #f0fdf0;
 }
 
 .meal-product-actions {
@@ -321,14 +311,12 @@ body {
     color: #000;
 }
 
-/* hover dla modyfikuj */
 .meal-product-actions .modify-btn:hover {
     background-color: #34eb4f;
     border-color: #34eb4f;
     color: #fff;
 }
 
-/* hover dla usuń */
 .meal-product-actions .delete-btn:hover {
     background-color: #dc2626;
     border-color: #dc2626;
@@ -341,7 +329,6 @@ body {
     color: #333;
 }
 
-/* Przyciski posiłku pod listą produktów */
 .meal-buttons {
     display: flex;
     justify-content: center;
@@ -361,13 +348,12 @@ body {
 }
 
 .meal-buttons button:hover {
-    background-color: #000000;
+    background-color: #000;
     color: #fff;
     border-color: #ccc;
 }
 
-
-/* Pole wyszukiwania w modalach */
+/* Pole wyszukiwania */
 .search-input {
     width: 100%;
     padding: 8px 12px;
@@ -377,7 +363,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Lista produktów do dodania (w productModal) */
 .product-list {
     display: flex;
     flex-direction: column;
@@ -388,10 +373,10 @@ body {
 }
 
 .product-item {
-    display: flex;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: 1fr 100px 70px;
     align-items: center;
-    justify-content: space-between;
+    gap: 10px;
     padding: 8px;
     background: #fff;
     border-radius: 8px;
@@ -399,13 +384,15 @@ body {
 }
 
 .product-item input[type="number"] {
-    width: 80px;
+    width: 100%;
     padding: 4px 6px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    box-sizing: border-box;
 }
 
 .product-item button {
+    width: 100%;
     font-size: 12px;
     padding: 6px 8px;
     border-radius: 6px;
@@ -421,15 +408,143 @@ body {
     border-color: #34eb4f;
 }
 
-.modal-userproducts-buttons {
+/* === MODAL: MOJE PRODUKTY === */
+.userproducts-overlay {
+    position: fixed;
+    top: 22px;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    justify-content: center;
     align-items: center;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 20px 0;
 }
 
-/* Zamknij modal */
-.close-btn {
+.userproducts-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 600px;
+    width: 95%;
+    max-height: 85vh;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.userproducts-modal h2 {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.userproducts-no-products {
+    text-align: center;
+    padding: 16px;
+    font-size: 14px;
+    color: #666;
+}
+
+.userproducts-search {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.userproducts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.userproducts-item {
+    display: grid;
+    grid-template-columns: 1fr 90px 70px 70px 70px;
+    gap: 8px;
+    align-items: center;
+    padding: 8px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.userproducts-item span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.userproducts-item input[type="number"] {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.userproducts-item button {
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f3f3f3;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.userproducts-add:hover {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+}
+
+.userproducts-modify:hover {
+    background-color: #34eb4f;
+    color: #fff;
+    border-color: #34eb4f;
+}
+
+.userproducts-delete:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+}
+
+.userproducts-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.userproducts-actions button {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.userproducts-actions button:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+.userproducts-close {
     display: block;
     margin: 20px auto 0 auto;
     background: lightgrey;
@@ -441,7 +556,55 @@ body {
     transition: background 0.2s, color 0.2s;
 }
 
-.close-btn:hover {
+.userproducts-close:hover {
     background: #dc2626;
     color: black;
+}
+
+/* === MODAL: DODAJ/EDYTUJ PRODUKT === */
+.adduserproduct-overlay {
+    position: fixed;
+    top: 22px;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+    overflow-y: auto;
+    padding: 20px 0;
+}
+
+.adduserproduct-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 500px;
+    width: 95%;
+    max-height: 80vh;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.adduserproduct-close {
+    margin-top: 12px;
+    background: #f3f3f3;
+    border: 1px solid #ccc;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    align-self: center; /* przycisk wyśrodkowany w kolumnie */
+    width: auto;
+}
+
+.adduserproduct-close:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #000;
 }

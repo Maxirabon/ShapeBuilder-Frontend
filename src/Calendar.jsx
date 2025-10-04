@@ -1,10 +1,10 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {
     addMealProduct, addUserProduct,
-    deleteMealProduct,
+    deleteMealProduct, deleteUserProduct,
     getAllProducts,
     getUserCaloricRequisition,
-    getUserDays, getUserProducts,
+    getUserDays, getUserProducts, modifyUserProduct,
     updateMealProduct
 } from "./api";
 import "./Calendar.css";
@@ -47,7 +47,7 @@ export default function Calendar() {
     const [search, setSearch] = useState("");
     const [amounts, setAmounts] = useState({});
     const [allUserProducts, setAllUserProducts] = useState([]);
-    const [addUserProductModal, setAddUserProductModal] = useState({ open: false });
+    const [addUserProductModal, setAddUserProductModal] = useState({open: false});
     const [newUserProduct, setNewUserProduct] = useState({
         name: "",
         protein: "",
@@ -55,6 +55,7 @@ export default function Calendar() {
         fat: "",
         calories: ""
     });
+
 
     const minDate = useMemo(() => {
         if (!rawDays.length) return null;
@@ -207,7 +208,7 @@ export default function Calendar() {
     const handleAddProduct = async (mealId, productId, amount, date) => {
         const parsedAmount = Number(amount);
         if (!parsedAmount || parsedAmount <= 0) {
-            console.log("Invalid data detected", { mealId, productId, parsedAmount, date });
+            console.log("Invalid data detected", {mealId, productId, parsedAmount, date});
             alert("Podaj poprawną ilość produktu");
             return;
         }
@@ -357,14 +358,52 @@ export default function Calendar() {
             });
 
             setAllUserProducts((prev) => [...prev, created]);
-            setAddUserProductModal({ open: false });
-            setNewUserProduct({ name: "", protein: "", carbs: "", fat: "", calories: "" });
+            setAddUserProductModal({open: false});
+            setNewUserProduct({name: "", protein: "", carbs: "", fat: "", calories: ""});
         } catch (err) {
             alert(err.message || "Nie udało się dodać produktu");
         }
     };
 
+    const handleModifyUserProduct = async () => {
+        if (!newUserProduct.id) {
+            alert("Brak ID produktu do modyfikacji");
+            return;
+        }
+        if (!newUserProduct.name || !newUserProduct.protein || !newUserProduct.carbs || !newUserProduct.fat || !newUserProduct.calories) {
+            alert("Uzupełnij wszystkie pola!");
+            return;
+        }
+        try {
+            const updated = await modifyUserProduct({
+                id: newUserProduct.id,
+                name: newUserProduct.name,
+                protein: Number(newUserProduct.protein),
+                carbs: Number(newUserProduct.carbs),
+                fat: Number(newUserProduct.fat),
+                calories: Number(newUserProduct.calories),
+            });
+            setAllUserProducts((prev) =>
+                prev.map((p) => (p.id === updated.id ? updated : p))
+            );
+            setAddUserProductModal({open: false, isEditing: false});
+            setNewUserProduct({id: null, name: "", protein: "", carbs: "", fat: "", calories: ""});
+            console.log("Zaktualizowano produkt:", updated);
+        } catch (e) {
+            alert(e.message);
+        }
+    }
 
+    const handleDeleteUserProduct = async (productId) => {
+        if (!window.confirm("Czy na pewno chcesz usunąć ten produkt?")) return;
+
+        try {
+            await deleteUserProduct(productId);
+            setAllUserProducts((prev) => prev.filter((p) => p.id !== productId));
+        } catch (err) {
+            alert(err.message || "Nie udało się usunąć produktu");
+        }
+    };
 
     return (
         <div className="calendar-container">
@@ -387,6 +426,7 @@ export default function Calendar() {
             <div className="calendar-card">
                 {/* Nagłówek miesiąca z przyciskami */}
                 <div className="calendar-header">
+                    {/* Modal żywienia */}
                     {nutritionModal.open && nutritionModal.entry && (
                         <div className="modal-overlay">
                             <div className="modal-content">
@@ -425,9 +465,9 @@ export default function Calendar() {
                                                 <div className="meal-products">
                                                     {meal.mealProducts.map((p) => (
                                                         <div key={p.id} className="meal-product-item">
-                              <span>
-                                {p.name} - {p.amount}g | kcal: {p.calories.toFixed(2)}, B: {p.protein.toFixed(2)}g, W: {p.carbs.toFixed(2)}g, T: {p.fat.toFixed(2)}g
-                              </span>
+                            <span>
+                              {p.name} - {p.amount}g | kcal: {p.calories.toFixed(2)}, B: {p.protein.toFixed(2)}g, W: {p.carbs.toFixed(2)}g, T: {p.fat.toFixed(2)}g
+                            </span>
                                                             <div className="meal-product-actions">
                                                                 <button
                                                                     className="modify-btn"
@@ -518,7 +558,7 @@ export default function Calendar() {
                                                     placeholder="ilość (g)"
                                                     value={amounts[`base-${p.id}`] || ""}
                                                     onChange={(e) =>
-                                                        setAmounts({ ...amounts, [`base-${p.id}`]: e.target.value })
+                                                        setAmounts({...amounts, [`base-${p.id}`]: e.target.value})
                                                     }
                                                 />
                                                 <button
@@ -536,18 +576,25 @@ export default function Calendar() {
                                             </div>
                                         ))}
                                 </div>
-                                <button className="close-btn" onClick={() => setProductModal({open: false, mealId: null, mealType: null})}>Zamknij</button>
+                                <button className="close-btn" onClick={() => setProductModal({
+                                    open: false,
+                                    mealId: null,
+                                    mealType: null
+                                })}>Zamknij
+                                </button>
                             </div>
                         </div>
                     )}
 
                     {/* Modal user-products */}
                     {userProductModal.open && (
-                        <div className="modal-overlay">
-                            <div className="modal-content">
+                        <div className="userproducts-overlay">
+                            <div className="userproducts-modal">
                                 <h2>Moje produkty</h2>
                                 {allUserProducts.length === 0 ? (
-                                    <div className="no-products"><p>Nie masz jeszcze własnych produktów</p></div>
+                                    <div className="userproducts-no-products">
+                                        <p>Nie masz jeszcze własnych produktów</p>
+                                    </div>
                                 ) : (
                                     <>
                                         <input
@@ -555,27 +602,38 @@ export default function Calendar() {
                                             placeholder="Szukaj w moich produktach..."
                                             value={search}
                                             onChange={(e) => setSearch(e.target.value)}
-                                            className="search-input"
+                                            className="userproducts-search"
                                         />
-                                        <div className="product-list">
+                                        <div className="userproducts-list">
                                             {allUserProducts
-                                                .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+                                                .filter((p) =>
+                                                    p.name.toLowerCase().includes(search.toLowerCase())
+                                                )
                                                 .map((p) => (
-                                                    <div key={`user-${p.id}`} className="product-item">
-                                                        <span>{p.name} ({p.calories} kcal / 100g)</span>
+                                                    <div
+                                                        key={`user-${p.id}`}
+                                                        className="userproducts-item"
+                                                    >
+                  <span>
+                    {p.name} ({p.calories} kcal / 100g)
+                  </span>
                                                         <input
                                                             type="number"
                                                             placeholder="ilość (g)"
                                                             value={amounts[`user-${p.id}`] || ""}
                                                             onChange={(e) =>
-                                                                setAmounts({ ...amounts, [`user-${p.id}`]: e.target.value })
+                                                                setAmounts({
+                                                                    ...amounts,
+                                                                    [`user-${p.id}`]: e.target.value,
+                                                                })
                                                             }
                                                         />
                                                         <button
+                                                            className="userproducts-add"
                                                             onClick={() =>
                                                                 handleAddProduct(
                                                                     userProductModal.mealId,
-                                                                    p.id, // <-- zawsze używaj p.id
+                                                                    p.id,
                                                                     amounts[`user-${p.id}`],
                                                                     nutritionModal.date
                                                                 )
@@ -583,79 +641,131 @@ export default function Calendar() {
                                                         >
                                                             Dodaj
                                                         </button>
+                                                        <button
+                                                            className="userproducts-modify"
+                                                            onClick={() => {
+                                                                setNewUserProduct({
+                                                                    id: p.id,
+                                                                    name: p.name,
+                                                                    protein: p.protein,
+                                                                    carbs: p.carbs,
+                                                                    fat: p.fat,
+                                                                    calories: p.calories,
+                                                                });
+                                                                setAddUserProductModal({
+                                                                    open: true,
+                                                                    isEditing: true,
+                                                                });
+                                                            }}
+                                                        >
+                                                            Modyfikuj
+                                                        </button>
+                                                        <button
+                                                            className="userproducts-delete"
+                                                            onClick={() => handleDeleteUserProduct(p.id)}
+                                                        >
+                                                            Usuń
+                                                        </button>
                                                     </div>
                                                 ))}
                                         </div>
                                     </>
                                 )}
-                                <div className="meal-buttons">
-                                    <button onClick={() => setAddUserProductModal({ open: true })}>
+                                <div className="userproducts-actions">
+                                    <button
+                                        onClick={() =>
+                                            setAddUserProductModal({ open: true, isEditing: false })
+                                        }
+                                    >
                                         Dodaj nowy produkt
                                     </button>
                                 </div>
-                                <button className="close-btn" onClick={() => setUserProductModal({ open: false, mealId: null, mealType: null })}>Zamknij</button>
+                                <button
+                                    className="userproducts-close"
+                                    onClick={() =>
+                                        setUserProductModal({
+                                            open: false,
+                                            mealId: null,
+                                            mealType: null,
+                                        })
+                                    }
+                                >
+                                    Zamknij
+                                </button>
                             </div>
                         </div>
                     )}
 
-                    {/* Modal dodawania własnego produktu */}
+                    {/* Modal dodawania / edycji własnego produktu */}
                     {addUserProductModal.open && (
-                        <div className="modal-overlay">
-                            <div className="modal-content">
-                                <h2>Dodaj własny produkt</h2>
+                        <div className="adduserproduct-overlay">
+                            <div className="adduserproduct-modal">
+                                <h2>{addUserProductModal.isEditing ? "Edytuj produkt" : "Dodaj własny produkt"}</h2>
 
                                 <input
                                     type="text"
                                     placeholder="Nazwa produktu"
                                     value={newUserProduct.name}
-                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, name: e.target.value })}
+                                    onChange={(e) => setNewUserProduct({...newUserProduct, name: e.target.value})}
                                     className="search-input"
                                 />
                                 <input
                                     type="number"
                                     placeholder="Białko (g/100g)"
                                     value={newUserProduct.protein}
-                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, protein: e.target.value })}
+                                    onChange={(e) => setNewUserProduct({...newUserProduct, protein: e.target.value})}
                                     className="search-input"
                                 />
                                 <input
                                     type="number"
                                     placeholder="Węglowodany (g/100g)"
                                     value={newUserProduct.carbs}
-                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, carbs: e.target.value })}
+                                    onChange={(e) => setNewUserProduct({...newUserProduct, carbs: e.target.value})}
                                     className="search-input"
                                 />
                                 <input
                                     type="number"
                                     placeholder="Tłuszcz (g/100g)"
                                     value={newUserProduct.fat}
-                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, fat: e.target.value })}
+                                    onChange={(e) => setNewUserProduct({...newUserProduct, fat: e.target.value})}
                                     className="search-input"
                                 />
                                 <input
                                     type="number"
                                     placeholder="Kalorie (kcal/100g)"
                                     value={newUserProduct.calories}
-                                    onChange={(e) => setNewUserProduct({ ...newUserProduct, calories: e.target.value })}
+                                    onChange={(e) => setNewUserProduct({...newUserProduct, calories: e.target.value})}
                                     className="search-input"
                                 />
-                                    <div className="meal-buttons">
-                                        <button className="modify-btn" onClick={handleSaveUserProduct}>Zapisz</button>
-                                    </div>
-                                    <button className="close-btn" onClick={() => setAddUserProductModal({ open: false })}>
-                                        Anuluj
+
+                                <div className="meal-buttons">
+                                    <button
+                                        className="modify-btn"
+                                        onClick={
+                                            addUserProductModal.isEditing
+                                                ? handleModifyUserProduct
+                                                : handleSaveUserProduct
+                                        }
+                                    >
+                                        {addUserProductModal.isEditing ? "Zapisz zmiany" : "Zapisz"}
                                     </button>
+                                </div>
+
+                                <button
+                                    className="adduserproduct-close"
+                                    onClick={() => setAddUserProductModal({open: false, isEditing: false})}
+                                >
+                                    Anuluj
+                                </button>
                             </div>
                         </div>
                     )}
-                    <button className="month-nav" onClick={goPrev} aria-label="Poprzedni miesiąc">
-                        ◀
-                    </button>
+
+                    <button className="month-nav" onClick={goPrev} aria-label="Poprzedni miesiąc">◀</button>
                     <div className="month-title">{monthTitle}</div>
-                    <button className="month-nav" onClick={goNext} aria-label="Następny miesiąc">
-                        ▶
-                    </button>
+                    <button className="month-nav" onClick={goNext} aria-label="Następny miesiąc">▶</button>
                 </div>
+
                 {/* Nagłówki dni tygodnia */}
                 <div className="calendar-weekdays">
                     {weekDays.map((wd) => (
