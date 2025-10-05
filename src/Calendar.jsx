@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {
     addExercise,
-    addMealProduct, addUserProduct,
+    addMealProduct, addUserProduct, deleteExercise,
     deleteMealProduct, deleteUserProduct, getAllExerciseTemplates,
     getAllProducts,
     getUserCaloricRequisition,
@@ -437,10 +437,10 @@ export default function Calendar() {
             alert("Podaj liczbę serii i powtórzeń!");
             return;
         }
+
         try {
             const correctedDate = new Date(exerciseModal.date);
-            correctedDate.setDate(correctedDate.getDate() + 1);
-
+            correctedDate.setDate(correctedDate.getDate() + 1); // jeśli potrzebne
             const formattedDate = correctedDate.toISOString().split("T")[0];
             const newExercise = await addExercise({
                 day: formattedDate,
@@ -449,6 +449,7 @@ export default function Calendar() {
                 repetitions: Number(_reps),
                 weight: Number(_weight) || 0,
             });
+
             setTrainingModal((prev) => ({
                 ...prev,
                 entry: {
@@ -456,6 +457,7 @@ export default function Calendar() {
                     exercises: [...(prev.entry.exercises || []), newExercise],
                 },
             }));
+
             setRawDays((prevDays) =>
                 prevDays.map((day) => {
                     if (formatYYYYMMDD(parseDateFromServer(day)) !== formattedDate) return day;
@@ -472,29 +474,46 @@ export default function Calendar() {
     };
 
     const handleModifyExercise = async () => {
+        console.log("handleModifyExercise wywołane");
+        console.log("editExerciseModal:", editExerciseModal);
+
         if (!editExerciseModal.exercise) {
             alert("Brak wybranego ćwiczenia do modyfikacji");
             return;
         }
+
         const { id, _sets, _reps, _weight, day } = editExerciseModal.exercise;
+        console.log("Exercise dane:", { id, _sets, _reps, _weight, day });
+
         if (!_sets || !_reps) {
             alert("Podaj liczbę serii i powtórzeń!");
             return;
         }
+
+        if (!id) {
+            console.error("ID ćwiczenia jest null lub undefined!");
+            alert("Nie można modyfikować ćwiczenia bez ID");
+            return;
+        }
+
         try {
-            const updatedData  = await updateExercise({
+            const updatedData = await updateExercise({
                 exerciseId: id,
                 sets: _sets,
                 repetitions: _reps,
                 weight: _weight || 0,
             });
 
+            console.log("Otrzymane z backendu updatedData:", updatedData);
+
             const updatedExercise = { ...editExerciseModal.exercise, ...updatedData };
             setTrainingModal((prev) => {
+                console.log("Poprzedni trainingModal:", prev);
                 if (!prev.entry) return prev;
                 const exercises = prev.entry.exercises.map((ex) =>
                     ex.id === updatedExercise.id ? updatedExercise : ex
                 );
+                console.log("Zaktualizowane exercises:", exercises);
                 return { ...prev, entry: { ...prev.entry, exercises } };
             });
 
@@ -510,9 +529,49 @@ export default function Calendar() {
                     };
                 })
             );
+
             setEditExerciseModal({ open: false, date: null, dayId: null, exercise: null });
         } catch (err) {
+            console.error("Błąd podczas modyfikacji ćwiczenia:", err);
             alert(err.message || "Nie udało się zmodyfikować ćwiczenia");
+        }
+    };
+
+
+    const handleDeleteExercise = async (exerciseId) => {
+        console.log("handleDeleteExercise wywołane, exerciseId:", exerciseId);
+
+        if (!exerciseId) {
+            console.error("exerciseId jest null lub undefined!");
+            alert("Nie można usunąć ćwiczenia bez ID");
+            return;
+        }
+
+        if (!window.confirm("Czy na pewno chcesz usunąć to ćwiczenie?")) return;
+
+        try {
+            const res = await deleteExercise(exerciseId);
+            console.log("deleteExercise response:", res);
+
+            setTrainingModal((prev) => {
+                console.log("Poprzedni trainingModal przed usunięciem:", prev);
+                if (!prev.entry) return prev;
+                const exercises = prev.entry.exercises.filter((ex) => ex.id !== exerciseId);
+                console.log("Zaktualizowane exercises po usunięciu:", exercises);
+                return { ...prev, entry: { ...prev.entry, exercises } };
+            });
+
+            setRawDays((prevDays) =>
+                prevDays.map((dayItem) => ({
+                    ...dayItem,
+                    exercises: dayItem.exercises.filter((ex) => ex.id !== exerciseId),
+                }))
+            );
+
+            alert("Ćwiczenie zostało usunięte.");
+        } catch (err) {
+            console.error("Błąd podczas usuwania ćwiczenia:", err);
+            alert(err.message || "Nie udało się usunąć ćwiczenia");
         }
     };
 
@@ -904,10 +963,7 @@ export default function Calendar() {
                                                         </button>
                                                         <button
                                                             className="btn-delete"
-                                                            /*
-                                                            onClick={() => handleRemoveExercise(trainingModal.entry.dayId, ex.id)}
-
-                                                             */
+                                                            onClick={() => handleDeleteExercise(ex.id)}
                                                         >
                                                             Usuń
                                                         </button>

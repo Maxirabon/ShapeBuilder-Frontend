@@ -261,7 +261,19 @@ export async function updateExercise({exerciseId, sets, repetitions, weight }){
     return await res.json();
 }
 
+export async function deleteExercise(exerciseId){
+    const res = await fetch(`${API_URL}/user/deleteExercise`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ id: exerciseId })
+    });
 
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się usunąć ćwiczenia");
+    }
+    return await res.text();
+}
 /**
  * Pobranie podsumowania dziennego (z posiłkami i produktami)
  * @param {number} dayId - id dnia (calendarId z backendu)
