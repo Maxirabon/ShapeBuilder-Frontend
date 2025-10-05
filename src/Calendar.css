@@ -272,6 +272,10 @@ body {
     box-sizing: border-box;
 }
 
+.meal-product-item:hover {
+    background-color: #C6F4C5;
+}
+
 .meal-product-item span {
     display: flex;
     flex-wrap: wrap;
@@ -372,6 +376,7 @@ body {
     padding-right: 4px;
 }
 
+
 .product-item {
     display: grid;
     grid-template-columns: 1fr 100px 70px;
@@ -381,6 +386,10 @@ body {
     background: #fff;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
+}
+
+.product-item:hover{
+    background-color: #C6F4C5;
 }
 
 .product-item input[type="number"] {
@@ -607,4 +616,191 @@ body {
     background: #dc2626;
     border-color: #dc2626;
     color: #000;
+}
+
+/* === MODAL: TRENING === */
+.training-section {
+    background: #f5f5f5;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 3px solid #2e7d32; /* zielona linia od ćwiczeń */
+}
+
+.training-section h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.training-exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.exercise-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.exercise-item span {
+    flex: 1;
+    color: #333;
+    font-weight: 500;
+}
+
+.exercise-item button {
+    background-color: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.exercise-item button:hover {
+    background-color: #256628;
+}
+
+.no-exercises {
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+    font-style: italic;
+    color: #666;
+}
+
+/* przyciski w modalu treningu */
+.training-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.training-buttons button {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.training-buttons button:hover {
+    background-color: #000;
+    color: #fff;
+    border-color: #ccc;
+}
+
+/* === MODAL: LISTA ĆWICZEŃ (exerciseModal) === */
+.exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.exercise-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 8px;
+}
+
+.exercise-item:hover {
+    background-color: #C6F4C5;
+}
+
+.exercise-name {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+.exercise-input {
+    width: 70px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.exercise-input:last-of-type {
+    width: 90px;
+}
+
+.exercise-item button {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    cursor: pointer;
+    color: #000;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.exercise-item button:hover {
+    background-color: #34eb4f;
+    color: #fff;
+    border-color: #34eb4f;
+}
+
+.exercise-item span {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+}
+
+.exercise-actions .btn-edit,
+.exercise-actions .btn-delete {
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: lightgrey;
+    color: #000;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.exercise-actions .btn-edit:hover {
+    background-color: #34eb4f;
+    color: #fff;
+    border-color: #34eb4f;
+}
+
+.exercise-actions .btn-delete:hover{
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
 }

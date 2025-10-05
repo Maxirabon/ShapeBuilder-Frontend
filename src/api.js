@@ -217,6 +217,34 @@ export async function deleteUserProduct(productId) {
     return await res.text();
 }
 
+export async function getAllExerciseTemplates(){
+    const res = await fetch(`${API_URL}/user/getAllExerciseTemplates`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać schematów ćwiczeń");
+    }
+    return await res.json();
+}
+
+export async function addExercise({ day, exerciseTemplateId, sets, repetitions, weight }){
+    const res = await fetch(`${API_URL}/user/addExercise`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ day, exerciseTemplateId, sets, repetitions, weight })
+    });
+
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Nie udało się dodać ćwiczenia");
+    }
+
+    return await res.json();
+}
+
 /**
  * Pobranie podsumowania dziennego (z posiłkami i produktami)
  * @param {number} dayId - id dnia (calendarId z backendu)

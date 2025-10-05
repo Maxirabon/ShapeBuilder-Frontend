@@ -1,7 +1,8 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {
+    addExercise,
     addMealProduct, addUserProduct,
-    deleteMealProduct, deleteUserProduct,
+    deleteMealProduct, deleteUserProduct, getAllExerciseTemplates,
     getAllProducts,
     getUserCaloricRequisition,
     getUserDays, getUserProducts, modifyUserProduct,
@@ -44,7 +45,11 @@ export default function Calendar() {
     const [productModal, setProductModal] = useState({open: false, mealId: null, mealType: null});
     const [userProductModal, setUserProductModal] = useState({open: false, mealId: null, mealType: null});
     const [allProducts, setAllProducts] = useState([]);
+    const [trainingModal, setTrainingModal] = useState({open: false, date: null, entry: null});
+    const [allExerciseTemplates, setAllExerciseTemplates] = useState([]);
+    const [exerciseModal, setExerciseModal] = useState({ open: false, date: null, dayId: null });
     const [search, setSearch] = useState("");
+    const [exerciseSearch, setExerciseSearch] = useState("");
     const [amounts, setAmounts] = useState({});
     const [allUserProducts, setAllUserProducts] = useState([]);
     const [addUserProductModal, setAddUserProductModal] = useState({open: false});
@@ -125,6 +130,21 @@ export default function Calendar() {
 
         fetchProducts();
     }, [productModal.open]);
+
+    useEffect(() => {
+        if(!exerciseModal.open) return;
+
+        async function fetchExerciseTemplates() {
+            try{
+                const exerciseTemplates = await getAllExerciseTemplates();
+                setAllExerciseTemplates(Array.isArray(exerciseTemplates) ? exerciseTemplates : []);
+            }catch(err){
+                console.error("Błąd pobierania schematów ćwiczeń:", err);
+            }
+        }
+
+        fetchExerciseTemplates();
+    }, [exerciseModal.open]);
 
     useEffect(() => {
         if (!userProductModal.open) return;
@@ -402,6 +422,46 @@ export default function Calendar() {
             setAllUserProducts((prev) => prev.filter((p) => p.id !== productId));
         } catch (err) {
             alert(err.message || "Nie udało się usunąć produktu");
+        }
+    };
+
+    const handleAddExercise = async (ex, exerciseModal, setTrainingModal) => {
+        const { _sets, _reps, _weight } = ex;
+        if (!_sets || !_reps) {
+            alert("Podaj liczbę serii i powtórzeń!");
+            return;
+        }
+        try {
+            const correctedDate = new Date(exerciseModal.date);
+            correctedDate.setDate(correctedDate.getDate() + 1);
+
+            const formattedDate = correctedDate.toISOString().split("T")[0];
+            const newExercise = await addExercise({
+                day: formattedDate,
+                exerciseTemplateId: ex.id,
+                sets: Number(_sets),
+                repetitions: Number(_reps),
+                weight: Number(_weight) || 0,
+            });
+            setTrainingModal((prev) => ({
+                ...prev,
+                entry: {
+                    ...prev.entry,
+                    exercises: [...(prev.entry.exercises || []), newExercise],
+                },
+            }));
+            setRawDays((prevDays) =>
+                prevDays.map((day) => {
+                    if (formatYYYYMMDD(parseDateFromServer(day)) !== formattedDate) return day;
+                    return {
+                        ...day,
+                        exercises: [...(day.exercises || []), newExercise],
+                    };
+                })
+            );
+        } catch (err) {
+            console.error("Błąd dodawania ćwiczenia:", err);
+            alert(err.message || "Nie udało się dodać ćwiczenia");
         }
     };
 
@@ -761,6 +821,160 @@ export default function Calendar() {
                         </div>
                     )}
 
+                    {/* Modal treningowy */}
+                    {trainingModal.open && trainingModal.entry && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h2>Dodaj trening - {formatYYYYMMDD(trainingModal.date)}</h2>
+
+                                <div className="training-section">
+                                    {trainingModal.entry.exercises && trainingModal.entry.exercises.length > 0 ? (
+                                        <div className="training-exercises">
+                                            {trainingModal.entry.exercises.map((ex) => (
+                                                <div key={ex.id} className="exercise-item">
+                                                    <div className="exercise-info">
+                                                        <span className="exercise-name"><strong>{ex.name} </strong></span>
+                                                        <span className="exercise-details">{ex.sets} serii {ex.repetitions} x </span>
+                                                        <span className="exercise-weight"><strong>{ex.weight} kg</strong></span>
+                                                    </div>
+                                                    <div className="exercise-actions">
+                                                        <button
+                                                            className="btn-edit"
+                                                            /*
+                                                            onClick={() => handleEditExercise(trainingModal.entry.dayId, ex)}
+
+                                                             */
+                                                        >
+                                                            Modyfikuj
+                                                        </button>
+                                                        <button
+                                                            className="btn-delete"
+                                                            /*
+                                                            onClick={() => handleRemoveExercise(trainingModal.entry.dayId, ex.id)}
+
+                                                             */
+                                                        >
+                                                            Usuń
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="no-exercises">Nie ma żadnych ćwiczeń w tym dniu</div>
+                                    )}
+                                </div>
+
+                                <div className="training-buttons">
+                                    <button
+                                        onClick={() =>
+                                            setExerciseModal({
+                                                open: true,
+                                                date: trainingModal.date,
+                                                dayId: trainingModal.entry.dayId,
+                                            })
+                                        }
+                                    >
+                                        Dodaj ćwiczenie
+                                    </button>
+                                </div>
+
+                                <button
+                                    className="close-btn"
+                                    onClick={() => setTrainingModal({ open: false, date: null, entry: null })}
+                                >
+                                    Zamknij
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Modal wyboru ćwiczeń z templatek */}
+                    {exerciseModal?.open && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h2>Wybierz ćwiczenie</h2>
+                                <input
+                                    type="text"
+                                    placeholder="Szukaj ćwiczenia..."
+                                    value={exerciseSearch}
+                                    onChange={(e) => setExerciseSearch(e.target.value)}
+                                    className="search-input"
+                                />
+
+                                <div className="exercise-list">
+                                    {allExerciseTemplates
+                                        .filter((ex) => ex.name.toLowerCase().includes(exerciseSearch.toLowerCase()))
+                                        .map((ex) => (
+                                            <div key={ex.id} className="exercise-item">
+                                                <span className="exercise-name">{ex.name}</span>
+
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="Serie"
+                                                    value={ex._sets || ""}
+                                                    onChange={(e) =>
+                                                        setAllExerciseTemplates((prev) =>
+                                                            prev.map((p) =>
+                                                                p.id === ex.id ? { ...p, _sets: e.target.value } : p
+                                                            )
+                                                        )
+                                                    }
+                                                    className="exercise-input"
+                                                />
+
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="Powt."
+                                                    value={ex._reps || ""}
+                                                    onChange={(e) =>
+                                                        setAllExerciseTemplates((prev) =>
+                                                            prev.map((p) =>
+                                                                p.id === ex.id ? { ...p, _reps: e.target.value } : p
+                                                            )
+                                                        )
+                                                    }
+                                                    className="exercise-input"
+                                                />
+
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.5"
+                                                    placeholder="Waga (kg)"
+                                                    value={ex._weight || ""}
+                                                    onChange={(e) =>
+                                                        setAllExerciseTemplates((prev) =>
+                                                            prev.map((p) =>
+                                                                p.id === ex.id ? { ...p, _weight: e.target.value } : p
+                                                            )
+                                                        )
+                                                    }
+                                                    className="exercise-input"
+                                                />
+
+                                                <button
+                                                    className="btn-add"
+                                                    onClick={() => handleAddExercise(ex, exerciseModal, setTrainingModal)}
+                                                >
+                                                    Dodaj
+                                                </button>
+                                            </div>
+                                        ))}
+                                </div>
+
+                                <button
+                                    className="close-btn"
+                                    onClick={() => setExerciseModal({ open: false, date: null, dayId: null })}
+                                >
+                                    Zamknij
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <button className="month-nav" onClick={goPrev} aria-label="Poprzedni miesiąc">◀</button>
                     <div className="month-title">{monthTitle}</div>
                     <button className="month-nav" onClick={goNext} aria-label="Następny miesiąc">▶</button>
@@ -819,7 +1033,7 @@ export default function Calendar() {
                                     </button>
                                     <button
                                         className="day-btn training"
-                                        onClick={() => console.log("Trening:", entry)}
+                                        onClick={() => setTrainingModal({ open: true, date, entry })}
                                     >
                                         Trening
                                     </button>
