@@ -468,8 +468,7 @@ export default function Calendar() {
                 })
             );
         } catch (err) {
-            console.error("Błąd dodawania ćwiczenia:", err);
-            alert(err.message || "Nie udało się dodać ćwiczenia");
+            alert(err.message);
         }
     };
 

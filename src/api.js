@@ -238,8 +238,15 @@ export async function addExercise({ day, exerciseTemplateId, sets, repetitions, 
     });
 
     if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Nie udało się dodać ćwiczenia");
+        let errorMessage = "Nie udało się dodać ćwiczenia";
+        try {
+            const errorData = await res.json();
+            if (errorData.message) errorMessage = errorData.message;
+            else if (errorData.error) errorMessage = errorData.error;
+        } catch (err) {
+            console.error("Błąd parsowania odpowiedzi błędu:", err);
+        }
+        throw new Error(errorMessage);
     }
 
     return await res.json();
