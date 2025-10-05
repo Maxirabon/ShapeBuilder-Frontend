@@ -245,6 +245,23 @@ export async function addExercise({ day, exerciseTemplateId, sets, repetitions, 
     return await res.json();
 }
 
+export async function updateExercise({exerciseId, sets, repetitions, weight }){
+    const res = await fetch(`${API_URL}/user/updateExercise`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({id: exerciseId, sets: Number(sets), repetitions: Number(repetitions), weight: Number(weight),
+        }),
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Response errorData:", errorData);
+        throw new Error(errorData.error || "Nie udało się zmodyfikować ćwiczenia");
+    }
+    return await res.json();
+}
+
+
 /**
  * Pobranie podsumowania dziennego (z posiłkami i produktami)
  * @param {number} dayId - id dnia (calendarId z backendu)

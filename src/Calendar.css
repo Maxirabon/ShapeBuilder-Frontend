@@ -32,7 +32,7 @@ body {
 .calendar-card {
     background: #f5f5f5;
     border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     padding: 16px;
 }
 
@@ -189,7 +189,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -205,7 +205,7 @@ body {
     max-width: 600px;
     width: 90%;
     max-height: 88vh;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -236,7 +236,7 @@ body {
 .meal-section {
     background: #f5f5f5;
     border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     padding: 16px;
     margin-bottom: 20px;
     display: flex;
@@ -266,7 +266,7 @@ body {
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
@@ -388,7 +388,7 @@ body {
     border: 1px solid #e0e0e0;
 }
 
-.product-item:hover{
+.product-item:hover {
     background-color: #C6F4C5;
 }
 
@@ -424,7 +424,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -440,7 +440,7 @@ body {
     max-width: 600px;
     width: 95%;
     max-height: 85vh;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -577,7 +577,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -593,7 +593,7 @@ body {
     max-width: 500px;
     width: 95%;
     max-height: 80vh;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -622,7 +622,7 @@ body {
 .training-section {
     background: #f5f5f5;
     border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     padding: 16px;
     margin-bottom: 20px;
     display: flex;
@@ -652,7 +652,7 @@ body {
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
@@ -799,8 +799,102 @@ body {
     border-color: #34eb4f;
 }
 
-.exercise-actions .btn-delete:hover{
+.exercise-actions .btn-delete:hover {
     background-color: #dc2626;
     border-color: #dc2626;
     color: #fff;
+}
+
+/* Overlay modalu edycji ćwiczenia */
+.edit-exercise-overlay {
+    position: fixed;
+    top: 22px;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    overflow-y: auto;
+    padding: 20px 0;
+}
+
+/* Kontener modalu edycji ćwiczenia */
+.edit-exercise-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 88vh;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* wyśrodkowanie w kolumnie */
+    gap: 12px; /* odstęp między elementami */
+    overflow-y: auto;
+}
+
+/* Nagłówek modalu */
+.edit-exercise-content h2 {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+/* Inputy w modalu edycji ćwiczenia */
+.edit-exercise-content .exercise-input {
+    width: 100%; /* inputy pełna szerokość kontenera */
+    max-width: 200px; /* ograniczenie szerokości */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* Kontener przycisków Zapisz / Anuluj */
+.edit-exercise-content .meal-buttons {
+    display: flex;
+    flex-direction: column; /* ustawienie w kolumnie */
+    gap: 10px; /* odstęp między przyciskami */
+    width: 100%;
+    align-items: center; /* wyśrodkowanie */
+    margin-top: 12px;
+}
+
+/* Przycisk Zapisz */
+.edit-exercise-content .modify-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid lightgrey;
+    background-color: lightgrey;
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.edit-exercise-content .modify-btn:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* Przycisk Anuluj */
+.edit-exercise-content .close-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid lightgrey;
+    background-color: lightgrey;
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.edit-exercise-content .close-btn:hover {
+    background-color: #dc2626;
+    color: #000;
 }

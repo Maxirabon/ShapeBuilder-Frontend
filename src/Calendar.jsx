@@ -5,7 +5,7 @@ import {
     deleteMealProduct, deleteUserProduct, getAllExerciseTemplates,
     getAllProducts,
     getUserCaloricRequisition,
-    getUserDays, getUserProducts, modifyUserProduct,
+    getUserDays, getUserProducts, modifyUserProduct, updateExercise,
     updateMealProduct
 } from "./api";
 import "./Calendar.css";
@@ -59,6 +59,12 @@ export default function Calendar() {
         carbs: "",
         fat: "",
         calories: ""
+    });
+    const [editExerciseModal, setEditExerciseModal] = useState({
+        open: false,
+        exercise: null,
+        dayId: null,
+        date: null,
     });
 
 
@@ -465,6 +471,51 @@ export default function Calendar() {
         }
     };
 
+    const handleModifyExercise = async () => {
+        if (!editExerciseModal.exercise) {
+            alert("Brak wybranego ćwiczenia do modyfikacji");
+            return;
+        }
+        const { id, _sets, _reps, _weight, day } = editExerciseModal.exercise;
+        if (!_sets || !_reps) {
+            alert("Podaj liczbę serii i powtórzeń!");
+            return;
+        }
+        try {
+            const updatedData  = await updateExercise({
+                exerciseId: id,
+                sets: _sets,
+                repetitions: _reps,
+                weight: _weight || 0,
+            });
+
+            const updatedExercise = { ...editExerciseModal.exercise, ...updatedData };
+            setTrainingModal((prev) => {
+                if (!prev.entry) return prev;
+                const exercises = prev.entry.exercises.map((ex) =>
+                    ex.id === updatedExercise.id ? updatedExercise : ex
+                );
+                return { ...prev, entry: { ...prev.entry, exercises } };
+            });
+
+            setRawDays((prevDays) =>
+                prevDays.map((dayItem) => {
+                    const key = formatYYYYMMDD(parseDateFromServer(dayItem));
+                    if (key !== formatYYYYMMDD(new Date(day))) return dayItem;
+                    return {
+                        ...dayItem,
+                        exercises: dayItem.exercises.map((ex) =>
+                            ex.id === updatedExercise.id ? updatedExercise : ex
+                        ),
+                    };
+                })
+            );
+            setEditExerciseModal({ open: false, date: null, dayId: null, exercise: null });
+        } catch (err) {
+            alert(err.message || "Nie udało się zmodyfikować ćwiczenia");
+        }
+    };
+
     return (
         <div className="calendar-container">
             {user && (
@@ -840,10 +891,14 @@ export default function Calendar() {
                                                     <div className="exercise-actions">
                                                         <button
                                                             className="btn-edit"
-                                                            /*
-                                                            onClick={() => handleEditExercise(trainingModal.entry.dayId, ex)}
-
-                                                             */
+                                                            onClick={() =>
+                                                                setEditExerciseModal({
+                                                                    open: true,
+                                                                    exercise: ex,
+                                                                    dayId: trainingModal.entry.dayId,
+                                                                    date: trainingModal.date,
+                                                                })
+                                                            }
                                                         >
                                                             Modyfikuj
                                                         </button>
@@ -971,6 +1026,67 @@ export default function Calendar() {
                                 >
                                     Zamknij
                                 </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {editExerciseModal.open && (
+                        <div className="edit-exercise-overlay">
+                            <div className="edit-exercise-content">
+                                <h2>Modyfikacja ćwiczenia - {editExerciseModal.exercise.name}</h2>
+
+                                <input
+                                    type="number"
+                                    min="1"
+                                    placeholder="Serie"
+                                    value={editExerciseModal.exercise._sets || ""}
+                                    onChange={(e) =>
+                                        setEditExerciseModal(prev => ({
+                                            ...prev,
+                                            exercise: { ...prev.exercise, _sets: e.target.value },
+                                        }))
+                                    }
+                                    className="exercise-input"
+                                />
+
+                                <input
+                                    type="number"
+                                    min="1"
+                                    placeholder="Powtórzenia"
+                                    value={editExerciseModal.exercise._reps || ""}
+                                    onChange={(e) =>
+                                        setEditExerciseModal(prev => ({
+                                            ...prev,
+                                            exercise: { ...prev.exercise, _reps: e.target.value },
+                                        }))
+                                    }
+                                    className="exercise-input"
+                                />
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="0.5"
+                                    placeholder="Waga (kg)"
+                                    value={editExerciseModal.exercise._weight || ""}
+                                    onChange={(e) =>
+                                        setEditExerciseModal(prev => ({
+                                            ...prev,
+                                            exercise: { ...prev.exercise, _weight: e.target.value },
+                                        }))
+                                    }
+                                    className="exercise-input"
+                                />
+
+                                <div className="meal-buttons">
+                                    <button className="modify-btn" onClick={handleModifyExercise}>Zapisz zmiany</button>
+                                    <button
+                                        className="close-btn"
+                                        onClick={() => setEditExerciseModal({ open: false, exercise: null, dayId: null, date: null })}
+                                    >
+                                        Anuluj
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
