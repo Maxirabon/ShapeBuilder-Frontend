@@ -281,6 +281,49 @@ export async function deleteExercise(exerciseId){
     }
     return await res.text();
 }
+
+export async function getUserInfo(){
+    const res = await fetch(`${API_URL}/user/getUserInfo`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Response errorData:", errorData);
+        throw new Error(errorData.error || "Nie udało się pobrać danych użytkownika");
+    }
+    return await res.json();
+}
+
+export async function changeUserPassword(oldPassword, newPassword) {
+    const response = await fetch(`${API_URL}/user/changePassword`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+            oldPassword: oldPassword,
+            newPassword: newPassword,
+        }),
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Nie udało się zmienić hasła");
+    }
+    return response;
+}
+
+export async function updateUserProfile(age, weight, height, activity){
+    const res = await fetch(`${API_URL}/user/updateProfile`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({age, weight, height, activity})
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się zmienić danych użytkownika");
+    }
+    return await res.json();
+}
 /**
  * Pobranie podsumowania dziennego (z posiłkami i produktami)
  * @param {number} dayId - id dnia (calendarId z backendu)
