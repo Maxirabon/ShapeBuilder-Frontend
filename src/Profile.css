@@ -11,7 +11,7 @@ body {
 .profile-container {
     padding: 20px;
     margin: calc(70px + 10px) auto 40px auto;
-    max-width: 1200px;
+    max-width: 1400px;
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
@@ -148,15 +148,3 @@ button:hover {
     margin-bottom: 12px;
 }
 
-/* Responsywność */
-@media (max-width: 768px) {
-    .profile-sections {
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .user-info,
-    .password-change {
-        min-width: 100%;
-    }
-}

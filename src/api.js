@@ -230,25 +230,16 @@ export async function getAllExerciseTemplates(){
     return await res.json();
 }
 
-export async function addExercise({ day, exerciseTemplateId, sets, repetitions, weight }){
+export async function addExercise({ day, exerciseTemplateId, userId, sets, repetitions, weight }){
     const res = await fetch(`${API_URL}/user/addExercise`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ day, exerciseTemplateId, sets, repetitions, weight })
+        body: JSON.stringify({ day, exerciseTemplateId, userId, sets, repetitions, weight })
     });
-
     if (!res.ok) {
-        let errorMessage = "Nie udało się dodać ćwiczenia";
-        try {
-            const errorData = await res.json();
-            if (errorData.message) errorMessage = errorData.message;
-            else if (errorData.error) errorMessage = errorData.error;
-        } catch (err) {
-            console.error("Błąd parsowania odpowiedzi błędu:", err);
-        }
-        throw new Error(errorMessage);
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się dodać ćwiczenia");
     }
-
     return await res.json();
 }
 
@@ -324,6 +315,44 @@ export async function updateUserProfile(age, weight, height, activity){
     }
     return await res.json();
 }
+
+export async function getAllUsersProfile(){
+    const res = await fetch(`${API_URL}/admin/getAllUsersProfile`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się wyświetlić profili użytkowników");
+    }
+    return await res.json();
+}
+
+export async function changeUserRole(userId, role){
+    const res = await fetch(`${API_URL}/admin/changeUserRole`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({id: userId, role: role})
+    })
+    if (!res.ok) throw new Error("Nie udało się zmienić roli");
+
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
+}
+
+export async function deleteUser(userId){
+    const res = await fetch(`${API_URL}/admin/deleteUser`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({id: userId})
+    })
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się zmienić roli użytkownika");
+    }
+    return await res.text();
+}
+
 /**
  * Pobranie podsumowania dziennego (z posiłkami i produktami)
  * @param {number} dayId - id dnia (calendarId z backendu)

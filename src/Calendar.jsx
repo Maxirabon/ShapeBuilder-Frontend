@@ -34,6 +34,7 @@ function capitalizeFirst(s) {
 
 export default function Calendar() {
     const [user, setUser] = useState(null);
+    const [currentUserId, setCurrentUserId] = useState(null);
     const [rawDays, setRawDays] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentMonth, setCurrentMonth] = useState(() => {
@@ -92,7 +93,11 @@ export default function Calendar() {
 
     useEffect(() => {
         const storedUser = sessionStorage.getItem("sb_user");
-        if (storedUser) setUser(JSON.parse(storedUser));
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            setUser(parsed);
+            setCurrentUserId(parsed.id);
+        }
 
         async function fetchData() {
             try {
@@ -445,6 +450,7 @@ export default function Calendar() {
             const newExercise = await addExercise({
                 day: formattedDate,
                 exerciseTemplateId: ex.id,
+                userId: currentUserId,
                 sets: Number(_sets),
                 repetitions: Number(_reps),
                 weight: Number(_weight) || 0,
@@ -473,22 +479,15 @@ export default function Calendar() {
     };
 
     const handleModifyExercise = async () => {
-        console.log("handleModifyExercise wywołane");
-        console.log("editExerciseModal:", editExerciseModal);
-
         if (!editExerciseModal.exercise) {
             alert("Brak wybranego ćwiczenia do modyfikacji");
             return;
         }
-
         const { id, _sets, _reps, _weight, day } = editExerciseModal.exercise;
-        console.log("Exercise dane:", { id, _sets, _reps, _weight, day });
-
         if (!_sets || !_reps) {
             alert("Podaj liczbę serii i powtórzeń!");
             return;
         }
-
         if (!id) {
             console.error("ID ćwiczenia jest null lub undefined!");
             alert("Nie można modyfikować ćwiczenia bez ID");
@@ -503,16 +502,12 @@ export default function Calendar() {
                 weight: _weight || 0,
             });
 
-            console.log("Otrzymane z backendu updatedData:", updatedData);
-
             const updatedExercise = { ...editExerciseModal.exercise, ...updatedData };
             setTrainingModal((prev) => {
-                console.log("Poprzedni trainingModal:", prev);
                 if (!prev.entry) return prev;
                 const exercises = prev.entry.exercises.map((ex) =>
                     ex.id === updatedExercise.id ? updatedExercise : ex
                 );
-                console.log("Zaktualizowane exercises:", exercises);
                 return { ...prev, entry: { ...prev.entry, exercises } };
             });
 
@@ -538,8 +533,6 @@ export default function Calendar() {
 
 
     const handleDeleteExercise = async (exerciseId) => {
-        console.log("handleDeleteExercise wywołane, exerciseId:", exerciseId);
-
         if (!exerciseId) {
             console.error("exerciseId jest null lub undefined!");
             alert("Nie można usunąć ćwiczenia bez ID");
@@ -551,7 +544,6 @@ export default function Calendar() {
         try {
             const res = await deleteExercise(exerciseId);
             console.log("deleteExercise response:", res);
-
             setTrainingModal((prev) => {
                 console.log("Poprzedni trainingModal przed usunięciem:", prev);
                 if (!prev.entry) return prev;
