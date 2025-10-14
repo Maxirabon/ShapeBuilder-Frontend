@@ -1,0 +1,119 @@
+.summary-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.summary-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 24px;
+}
+
+/* --- Tabs --- */
+.summary-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.summary-tab {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    background-color: #e5e7eb;
+    color: #334155;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.summary-tab.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* --- Range buttons --- */
+.summary-range {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.summary-range-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.summary-range-btn.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.summary-loading,
+.summary-empty {
+    text-align: center;
+    color: #64748b;
+    font-size: 15px;
+    margin-top: 20px;
+}
+
+/* --- Cards --- */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.summary-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card-title {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.summary-card-value {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.summary-card-unit {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Kolory kart */
+.summary-card.orange .summary-card-value {
+    color: #f97316;
+}
+.summary-card.blue .summary-card-value {
+    color: #2563eb;
+}
+.summary-card.green .summary-card-value {
+    color: #16a34a;
+}
+.summary-card.yellow .summary-card-value {
+    color: #eab308;
+}

@@ -363,6 +363,69 @@ export async function getDaySummary(dayId) {
         method: "GET",
         headers: getAuthHeaders(),
     });
-    if (!res.ok) throw new Error("Błąd pobierania podsumowania dnia");
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać podsumowania dnia - żywienie");
+    }
+    return await res.json();
+}
+
+export async function getWeekSummary(userId){
+    const res = await fetch(`${API_URL}/user/getWeekSummary/${userId}`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać podsumowania tygodnia - żywienie");
+    }
+    return await res.json();
+}
+
+export async function getMonthSummary(userId, year, month){
+    const res = await fetch(`${API_URL}/user/getMonthSummary/${userId}/${year}/${month}`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać podsumowania miesiąca - żywienie");
+    }
+    return await res.json();
+}
+
+export async function getDayExerciseSummary(dayId) {
+    const res = await fetch(`${API_URL}/user/getDayExerciseSummary/${dayId}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać podsumowania dnia - trening");
+    }
+    return await res.json();
+}
+
+export async function getWeekExerciseSummary(userId){
+    const res = await fetch(`${API_URL}/user/getWeekExerciseSummary/${userId}`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać podsumowania tygodnia - trening");
+    }
+    return await res.json();
+}
+
+export async function getMonthExerciseSummary(userId, year, month){
+    const res = await fetch(`${API_URL}/user/getMonthExerciseSummary/${userId}/${year}/${month}`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać podsumowania miesiąca - trening");
+    }
     return await res.json();
 }

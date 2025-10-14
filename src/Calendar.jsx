@@ -19,7 +19,6 @@ function parseDateFromServer(item) {
     return new Date(item.day);
 }
 
-
 //Formatuje datę do stringa YYYY-MM-DD
 function formatYYYYMMDD(date) {
     const y = date.getFullYear();
