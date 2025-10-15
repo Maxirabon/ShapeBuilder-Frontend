@@ -1,17 +1,19 @@
 .summary-container {
     max-width: 1000px;
-    margin: 40px auto;
+    margin: calc(var(--navbar-height) + 20px) auto 40px auto;
     background: #fff;
-    border-radius: 20px;
+    border-radius: 16px; /* dopasowane do panelu admina */
     padding: 32px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06); /* taki sam cień jak w admin-container */
+    box-sizing: border-box;
+    border-bottom: 3px solid #9edaa6;
 }
 
 .summary-title {
     text-align: center;
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
-    color: #1e293b;
+    color: #222; /* dopasowane do user-name */
     margin-bottom: 24px;
 }
 
@@ -25,18 +27,19 @@
 
 .summary-tab {
     padding: 10px 22px;
-    border-radius: 10px;
-    border: none;
-    background-color: #e5e7eb;
-    color: #334155;
-    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f3f3f3;
+    color: #333;
+    font-weight: 500;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.2s ease;
 }
 
 .summary-tab.active {
-    background-color: #2563eb;
-    color: white;
+    background-color: #34eb4f;
+    color: #fff;
+    border-color: #34eb4f;
 }
 
 /* --- Range buttons --- */
@@ -50,19 +53,20 @@
 .summary-range-btn {
     padding: 8px 18px;
     border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background: white;
-    color: #475569;
+    border: 1px solid #ccc;
+    background: #f3f3f3;
+    color: #333;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.2s ease;
 }
 
 .summary-range-btn.active {
-    background: #2563eb;
-    color: white;
-    border-color: #2563eb;
+    background: #34eb4f;
+    color: #fff;
+    border-color: #34eb4f;
 }
 
+/* --- Loading / Empty states --- */
 .summary-loading,
 .summary-empty {
     text-align: center;
@@ -80,16 +84,22 @@
 }
 
 .summary-card {
-    background: #f8fafc;
-    border-radius: 12px;
+    background: #f5f5f5; /* dopasowane do user-card */
+    border-radius: 14px;
     padding: 16px;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
 }
 
 .summary-card-title {
     font-size: 14px;
-    color: #64748b;
+    color: #333;
     margin-bottom: 4px;
 }
 

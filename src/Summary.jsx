@@ -175,7 +175,7 @@ export default function Summary() {
             const CustomTooltip = ({ active, payload, label }) => {
                 if (!active || !payload || payload.length === 0) return null;
 
-                const total = payload[0].payload.totalKcal;
+                const total = payload[0].payload.totalKcal ?? 0;
 
                 return (
                     <div className="bg-white p-3 rounded-lg shadow-md text-sm border border-gray-200">
@@ -197,13 +197,10 @@ export default function Summary() {
                                         : "#eab308";
                             return (
                                 <div key={entry.dataKey} className="flex justify-between items-center mb-1">
-                                <span className="flex items-center gap-2">
-                                    <span
-                                        className="w-3 h-3 rounded-full"
-                                        style={{ backgroundColor: color }}
-                                    ></span>
-                                    <span style={{ color }}>{name}:</span>
-                                </span>
+                            <span className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></span>
+                                <span style={{ color }}>{name}:</span>
+                            </span>
                                     <span> {value.toFixed(0)} kcal ({percent}%)</span>
                                 </div>
                             );
@@ -217,38 +214,36 @@ export default function Summary() {
 
             return (
                 <ResponsiveContainer width="100%" height={400}>
-                    <ResponsiveContainer width="100%" height={400}>
-                        <BarChart
-                            data={kcalData}
-                            barSize={40}
-                            barCategoryGap="20%"
-                            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis domain={[0, 5000]} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend
-                                payload={[
-                                    { value: "Białko", type: "square", color: "#3b82f6" },
-                                    { value: "Węgle", type: "square", color: "#22c55e" },
-                                    { value: "Tłuszcze", type: "square", color: "#eab308" },
-                                ]}
-                            />
-                            <Bar dataKey="proteinKcal" stackId="a" fill="#3b82f6" />
-                            <Bar dataKey="carbsKcal" stackId="a" fill="#22c55e" />
-                            <Bar dataKey="fatKcal" stackId="a" fill="#eab308" />
+                    <BarChart
+                        data={kcalData}
+                        barSize={40}
+                        barCategoryGap="20%"
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis domain={[0, 5000]} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend
+                            payload={[
+                                { value: "Białko", type: "square", color: "#3b82f6" },
+                                { value: "Węgle", type: "square", color: "#22c55e" },
+                                { value: "Tłuszcze", type: "square", color: "#eab308" },
+                            ]}
+                        />
+                        <Bar dataKey="proteinKcal" stackId="a" fill="#3b82f6" />
+                        <Bar dataKey="carbsKcal" stackId="a" fill="#22c55e" />
+                        <Bar dataKey="fatKcal" stackId="a" fill="#eab308" />
 
-                            {caloricRequisition && (
-                                <ReferenceLine
-                                    y={caloricRequisition}
-                                    stroke="red"
-                                    strokeDasharray="3 3"
-                                    label={{position: 'right', fill: 'red', fontSize: 12 }}
-                                />
-                            )}
-                        </BarChart>
-                    </ResponsiveContainer>
+                        {caloricRequisition && (
+                            <ReferenceLine
+                                y={caloricRequisition}
+                                stroke="red"
+                                strokeDasharray="3 3"
+                                label={{ position: 'right', fill: 'red', fontSize: 12 }}
+                            />
+                        )}
+                    </BarChart>
                 </ResponsiveContainer>
             );
         }
