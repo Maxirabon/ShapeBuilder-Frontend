@@ -136,6 +136,43 @@
     fill: #334155;
 }
 
+/* --- Line Chart Wrapper --- */
+.summary-linechart {
+    width: 100%;
+    max-width: 900px;
+    height: 350px;
+    margin: 0 auto 30px auto;
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Tooltip styling */
 .recharts-tooltip-wrapper {
     font-size: 13px;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Legend styling */
+.recharts-legend-wrapper {
+    font-size: 13px;
+    color: #334155;
+}
+
+/* Pie chart label styling */
+.recharts-text.recharts-label {
+    font-size: 12px;
+    fill: #334155;
+}
+
+/* ReferenceLine label */
+.recharts-reference-line-label {
+    fill: red;
+    font-size: 12px;
+    font-weight: 600;
 }

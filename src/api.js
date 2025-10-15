@@ -370,11 +370,16 @@ export async function getDaySummary(dayId) {
     return await res.json();
 }
 
-export async function getWeekSummary(userId){
-    const res = await fetch(`${API_URL}/user/getWeekSummary/${userId}`, {
+export async function getWeekSummary(userId, startOfWeek = null, endOfWeek = null) {
+    const params = new URLSearchParams();
+    if (startOfWeek) params.append("startOfWeek", startOfWeek);
+    if (endOfWeek) params.append("endOfWeek", endOfWeek);
+
+    const res = await fetch(`${API_URL}/user/getWeekSummary/${userId}?${params.toString()}`, {
         method: "GET",
         headers: getAuthHeaders()
     });
+
     if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Nie udało się pobrać podsumowania tygodnia - żywienie");
@@ -382,11 +387,17 @@ export async function getWeekSummary(userId){
     return await res.json();
 }
 
-export async function getMonthSummary(userId, year, month){
-    const res = await fetch(`${API_URL}/user/getMonthSummary/${userId}/${year}/${month}`, {
+export async function getMonthSummary(userId, year = null, month = null) {
+    let url = `${API_URL}/user/getMonthSummary/${userId}`;
+    if (year && month) {
+        url += `/${year}/${month}`;
+    }
+
+    const res = await fetch(url, {
         method: "GET",
         headers: getAuthHeaders()
     });
+
     if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Nie udało się pobrać podsumowania miesiąca - żywienie");
