@@ -117,3 +117,25 @@
 .summary-card.yellow .summary-card-value {
     color: #eab308;
 }
+
+/* --- Pie Chart (Wykres kołowy makroskładników) --- */
+.summary-piechart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px auto;
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    max-width: 500px;
+}
+
+.summary-piechart text {
+    font-size: 12px;
+    fill: #334155;
+}
+
+.recharts-tooltip-wrapper {
+    font-size: 13px;
+}
