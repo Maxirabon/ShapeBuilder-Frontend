@@ -417,8 +417,12 @@ export async function getDayExerciseSummary(dayId) {
     return await res.json();
 }
 
-export async function getWeekExerciseSummary(userId){
-    const res = await fetch(`${API_URL}/user/getWeekExerciseSummary/${userId}`, {
+export async function getWeekExerciseSummary(userId, startOfWeek, endOfWeek){
+    const params = new URLSearchParams();
+    if (startOfWeek) params.append("startOfWeek", startOfWeek);
+    if (endOfWeek) params.append("endOfWeek", endOfWeek);
+
+    const res = await fetch(`${API_URL}/user/getWeekExerciseSummary/${userId}?${params.toString()}`, {
         method: "GET",
         headers: getAuthHeaders()
     });
