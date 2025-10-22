@@ -26,7 +26,7 @@ import "./Summary.css";
 export default function Summary() {
     const [user, setUser] = useState(null);
     const today = new Date();
-    /** --- DIETA --- **/
+    /** DIETA **/
     const [rangeNutrition, setRangeNutrition] = useState("week");
     const [selectedDayIdNutrition, setSelectedDayIdNutrition] = useState(null);
     const [selectedWeekNutrition, setSelectedWeekNutrition] = useState({ start: null, end: null });
@@ -36,7 +36,7 @@ export default function Summary() {
     const [summaryNutrition, setSummaryNutrition] = useState(null);
     const [loadingNutrition, setLoadingNutrition] = useState(false);
 
-    /** --- TRENING --- **/
+    /** TRENING **/
     const [rangeTraining, setRangeTraining] = useState("week");
     const [selectedDayIdTraining, setSelectedDayIdTraining] = useState(null);
     const [selectedWeekTraining, setSelectedWeekTraining] = useState({ start: null, end: null });
@@ -62,7 +62,6 @@ export default function Summary() {
             if (!user) return;
             const days = await getUserDays();
             setUserDays(days);
-
             const todayStr = new Date().toISOString().split("T")[0];
             const todayEntry = days.find(d => d.day.startsWith(todayStr));
             if (todayEntry){
@@ -70,7 +69,6 @@ export default function Summary() {
                 setSelectedDayIdTraining(todayEntry.dayId);
             }
         }
-
         fetchUserDays();
     }, [user]);
 
@@ -83,7 +81,6 @@ export default function Summary() {
                 console.error("Błąd pobierania zapotrzebowania kalorycznego:", err);
             }
         }
-
         if (user) fetchCalories();
     }, [user]);
 
@@ -96,10 +93,8 @@ export default function Summary() {
         const start = getDateOfISOWeek(week, year);
         const end = new Date(start);
         end.setDate(end.getDate() + 6);
-
         setSelectedWeekInputNutrition(`${year}-W${String(week).padStart(2, "0")}`);
         setSelectedWeekNutrition({ start, end: end.toISOString().split("T")[0] });
-
         setSelectedWeekInputTraining(`${year}-W${String(week).padStart(2, "0")}`);
         setSelectedWeekTraining({ start, end: end.toISOString().split("T")[0] });
     }, []);
@@ -116,13 +111,11 @@ export default function Summary() {
             } else if (rangeNutrition === "month") {
                 data = await getMonthSummary(user.id, selectedMonthNutrition.year, selectedMonthNutrition.month);
             }
-
             if (!data) {
                 setChartDataNutrition([]);
                 setSummaryNutrition(null);
                 return;
             }
-
             setChartDataNutrition(data.chartData || []);
             setSummaryNutrition({
                 calories: parseFloat(data.avgCalories ?? data.totalCalories ?? 0),
@@ -146,13 +139,11 @@ export default function Summary() {
             } else if (rangeTraining === "month") {
                 data = await getMonthExerciseSummary(user.id, selectedMonthTraining.year, selectedMonthTraining.month);
             }
-
             if (!data) {
                 setChartDataTraining([]);
                 setSummaryTraining(null);
                 return;
             }
-
             setChartDataTraining(data.chartData || []);
             setSummaryTraining({
                 avgVolume: parseFloat(data.avgVolume ?? 0),
@@ -162,6 +153,7 @@ export default function Summary() {
         finally { setLoadingTraining(false); }
     }
 
+    //Funkcja pomocnicza - zwracanie aktualnego tygodnia na podstawie daty (dla małych kalendarzyków)
     function getWeekNumber(d) {
         const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         const dayNum = date.getUTCDay() || 7;
@@ -170,6 +162,7 @@ export default function Summary() {
         return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
     }
 
+    //Funkcja pomocnicza - zwracanie pierwszego dnia (jako string) aktualnego tygodnia
     function getDateOfISOWeek(week, year) {
         const simple = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
         const dayOfWeek = simple.getUTCDay();
@@ -187,6 +180,7 @@ export default function Summary() {
 
         if (chartData.length === 0 && range !== "day") return <p className="summary-empty">Brak danych do wyświetlenia.</p>;
 
+        //DIETA - wykres kołowy makroskładników (dzienny)
         if (tab === "nutrition" && range === "day" && summaryNutrition) {
             const hasData = summaryNutrition.protein > 0 || summaryNutrition.carbs > 0 || summaryNutrition.fat > 0;
             if (!hasData) return <p className="summary-empty">Brak danych do wyświetlenia.</p>;

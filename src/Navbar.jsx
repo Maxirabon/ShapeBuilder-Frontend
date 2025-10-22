@@ -5,7 +5,6 @@ import "./Navbar.css";
 
 export default function Navbar({ setToken }) {
     const navigate = useNavigate();
-
     const user = JSON.parse(sessionStorage.getItem("sb_user") || "{}");
     const isAdmin = user?.role === "ROLE_ADMIN";
 

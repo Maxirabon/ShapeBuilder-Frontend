@@ -1,13 +1,13 @@
-/* === GLOBAL === */
+/* GLOBAL */
 :root {
-    --navbar-height: 64px; /* domyślna wysokość navbaru */
+    --navbar-height: 64px;
 }
 
 body {
     background-color: #e6f9e6;
 }
 
-/* === KALENDARZ === */
+/* KALENDARZ */
 .calendar-container {
     padding: calc(var(--navbar-height) + 2px) 20px 40px 20px;
     max-width: 1800px;
@@ -181,7 +181,7 @@ body {
     text-align: center;
 }
 
-/* === MODALE OGÓLNE === */
+/* MODALE OGÓLNE */
 .modal-overlay {
     position: fixed;
     top: 22px;
@@ -231,7 +231,7 @@ body {
     color: black;
 }
 
-/* === MODAL: ŻYWIENIE/TRENING === */
+/* MODAL: ŻYWIENIE/TRENING */
 .meal-section {
     background: #f5f5f5;
     border-radius: 12px;
@@ -356,7 +356,7 @@ body {
     border-color: #ccc;
 }
 
-/* Pole wyszukiwania */
+/* POLE WYSZUKIWANIA */
 .search-input {
     width: 100%;
     padding: 8px 12px;
@@ -416,7 +416,7 @@ body {
     border-color: #34eb4f;
 }
 
-/* === MODAL: MOJE PRODUKTY === */
+/* MODAL: MOJE PRODUKTY */
 .userproducts-overlay {
     position: fixed;
     top: 22px;
@@ -569,7 +569,7 @@ body {
     color: black;
 }
 
-/* === MODAL: DODAJ/EDYTUJ PRODUKT === */
+/* MODAL: DODAJ/EDYTUJ PRODUKT UŻYTKOWNIKA */
 .adduserproduct-overlay {
     position: fixed;
     top: 22px;
@@ -607,7 +607,7 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     transition: background 0.2s, color 0.2s, border-color 0.2s;
-    align-self: center; /* przycisk wyśrodkowany w kolumnie */
+    align-self: center;
     width: auto;
 }
 
@@ -617,7 +617,7 @@ body {
     color: #000;
 }
 
-/* === MODAL: TRENING === */
+/* MODAL: TRENING */
 .training-section {
     background: #f5f5f5;
     border-radius: 12px;
@@ -626,7 +626,7 @@ body {
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
-    border-bottom: 3px solid #2e7d32; /* zielona linia od ćwiczeń */
+    border-bottom: 3px solid #2e7d32;
 }
 
 .training-section h3 {
@@ -687,7 +687,6 @@ body {
     color: #666;
 }
 
-/* przyciski w modalu treningu */
 .training-buttons {
     display: flex;
     justify-content: center;
@@ -712,7 +711,7 @@ body {
     border-color: #ccc;
 }
 
-/* === MODAL: LISTA ĆWICZEŃ (exerciseModal) === */
+/* MODAL: LISTA ĆWICZEŃ */
 .exercise-list {
     display: flex;
     flex-direction: column;
@@ -804,7 +803,7 @@ body {
     color: #fff;
 }
 
-/* Overlay modalu edycji ćwiczenia */
+/* MODAL: EDYCJI ĆWICZENIA */
 .edit-exercise-overlay {
     position: fixed;
     top: 22px;
@@ -820,7 +819,6 @@ body {
     padding: 20px 0;
 }
 
-/* Kontener modalu edycji ćwiczenia */
 .edit-exercise-content {
     background: #fff;
     border-radius: 12px;
@@ -831,21 +829,19 @@ body {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    align-items: center; /* wyśrodkowanie w kolumnie */
-    gap: 12px; /* odstęp między elementami */
+    align-items: center;
+    gap: 12px;
     overflow-y: auto;
 }
 
-/* Nagłówek modalu */
 .edit-exercise-content h2 {
     text-align: center;
     margin-bottom: 16px;
 }
 
-/* Inputy w modalu edycji ćwiczenia */
 .edit-exercise-content .exercise-input {
-    width: 100%; /* inputy pełna szerokość kontenera */
-    max-width: 200px; /* ograniczenie szerokości */
+    width: 100%;
+    max-width: 200px;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -854,17 +850,15 @@ body {
     margin-bottom: 10px;
 }
 
-/* Kontener przycisków Zapisz / Anuluj */
 .edit-exercise-content .meal-buttons {
     display: flex;
-    flex-direction: column; /* ustawienie w kolumnie */
-    gap: 10px; /* odstęp między przyciskami */
+    flex-direction: column;
+    gap: 10px;
     width: 100%;
-    align-items: center; /* wyśrodkowanie */
+    align-items: center;
     margin-top: 12px;
 }
 
-/* Przycisk Zapisz */
 .edit-exercise-content .modify-btn {
     font-size: 12px;
     padding: 6px 10px;
@@ -881,7 +875,6 @@ body {
     color: #fff;
 }
 
-/* Przycisk Anuluj */
 .edit-exercise-content .close-btn {
     font-size: 12px;
     padding: 6px 10px;

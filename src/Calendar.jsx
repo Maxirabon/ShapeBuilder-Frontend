@@ -10,16 +10,12 @@ import {
 } from "./api";
 import "./Calendar.css";
 
-/**
- * Prosty parser daty z backendu
- * @param {Object} item - obiekt dnia z backendu { dayId, day, modification_date }
- * @returns {Date} obiekt Date
- */
+//Funkcja pomocnicza - konwertowanie daty z backendu na obiekt typu Date
 function parseDateFromServer(item) {
     return new Date(item.day);
 }
 
-//Formatuje datę do stringa YYYY-MM-DD
+//Funkcja pomocnicza - formatowanie daty do stringa (YYYYMMDD)
 function formatYYYYMMDD(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -27,6 +23,7 @@ function formatYYYYMMDD(date) {
     return `${y}-${m}-${d}`;
 }
 
+//Funkcja pomocnicza - Zamiana pierwszej litery stringa na dużą
 function capitalizeFirst(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -53,26 +50,16 @@ export default function Calendar() {
     const [amounts, setAmounts] = useState({});
     const [allUserProducts, setAllUserProducts] = useState([]);
     const [addUserProductModal, setAddUserProductModal] = useState({open: false});
-    const [newUserProduct, setNewUserProduct] = useState({
-        name: "",
-        protein: "",
-        carbs: "",
-        fat: "",
-        calories: ""
-    });
-    const [editExerciseModal, setEditExerciseModal] = useState({
-        open: false,
-        exercise: null,
-        dayId: null,
-        date: null,
-    });
+    const [newUserProduct, setNewUserProduct] = useState({name: "", protein: "", carbs: "", fat: "", calories: ""});
+    const [editExerciseModal, setEditExerciseModal] = useState({open: false, exercise: null, dayId: null, date: null,});
 
-
+    //Funkcja pomocnicza - wyznacznie najmniejszej daty z kalendarza z backendu
     const minDate = useMemo(() => {
         if (!rawDays.length) return null;
         return parseDateFromServer(rawDays[0]);
     }, [rawDays]);
 
+    //Funkcja pomocnicza - wyznacznie największej daty z kalendarza z backendu
     const maxDate = useMemo(() => {
         if (!rawDays.length) return null;
         return parseDateFromServer(rawDays[rawDays.length - 1]);
@@ -109,7 +96,6 @@ export default function Calendar() {
                 setLoading(false);
             }
         }
-
         fetchData();
     }, []);
 
@@ -122,13 +108,11 @@ export default function Calendar() {
                 console.error("Błąd pobierania zapotrzebowania kalorycznego:", err);
             }
         }
-
         if (user) fetchCalories();
     }, [user]);
 
     useEffect(() => {
         if (!productModal.open) return;
-
         async function fetchProducts() {
             try {
                 const products = await getAllProducts();
@@ -137,13 +121,11 @@ export default function Calendar() {
                 console.error("Błąd pobierania produktów:", err);
             }
         }
-
         fetchProducts();
     }, [productModal.open]);
 
     useEffect(() => {
         if(!exerciseModal.open) return;
-
         async function fetchExerciseTemplates() {
             try{
                 const exerciseTemplates = await getAllExerciseTemplates();
@@ -152,13 +134,11 @@ export default function Calendar() {
                 console.error("Błąd pobierania schematów ćwiczeń:", err);
             }
         }
-
         fetchExerciseTemplates();
     }, [exerciseModal.open]);
 
     useEffect(() => {
         if (!userProductModal.open) return;
-
         async function fetchUserProducts() {
             try {
                 const userProducts = await getUserProducts();
@@ -167,11 +147,10 @@ export default function Calendar() {
                 console.error("Błąd pobierania produktow uzytkownika:", err);
             }
         }
-
         fetchUserProducts();
     }, [userProductModal.open]);
 
-    // Mapa dni do obiektów backendu
+    // Funkcja pomocnicza - utworzenie mapy dni do obiektów backendu
     const daysMap = useMemo(() => {
         const m = new Map();
         rawDays.forEach((item) => {
@@ -188,11 +167,11 @@ export default function Calendar() {
 
     const weekDays = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
 
-    // obliczenia dla bieżącego miesiąca
+    // Obliczenia dla bieżącego miesiąca
     const year = currentMonth.getFullYear();
     const monthIndex = currentMonth.getMonth();
     const firstOfMonth = new Date(year, monthIndex, 1);
-    const offset = (firstOfMonth.getDay() + 6) % 7; // przesunięcie dla poniedziałku
+    const offset = (firstOfMonth.getDay() + 6) % 7;
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
     const cells = [];
@@ -204,10 +183,9 @@ export default function Calendar() {
         cells.push({date, entry});
     }
 
-    const monthTitle = capitalizeFirst(
-        currentMonth.toLocaleString("pl-PL", {month: "long", year: "numeric"})
-    );
+    const monthTitle = capitalizeFirst(currentMonth.toLocaleString("pl-PL", {month: "long", year: "numeric"}));
 
+    //Funkcje do przewijania miesięcy w kalendarzu
     const goPrev = () => {
         const prev = new Date(year, monthIndex - 1, 1);
         if (!minDate || prev >= new Date(minDate.getFullYear(), minDate.getMonth(), 1)) {
@@ -222,6 +200,7 @@ export default function Calendar() {
         }
     };
 
+    //Funkcja pomocnicza - do sumowania i wyświetlania dziennych mikroskładników
     function getDayTotals(day) {
         if (!day || !day.meals) return {calories: 0, protein: 0, carbs: 0, fat: 0};
         return day.meals.reduce((acc, meal) => {
@@ -246,10 +225,8 @@ export default function Calendar() {
             alert("Brak wymaganych danych lub niepoprawna ilość");
             return;
         }
-
         try {
             const updatedMeal = await addMealProduct(mealId, productId, parsedAmount);
-
             // Aktualizacja modala
             setNutritionModal(prev => {
                 if (!prev.entry) return prev;
@@ -258,7 +235,6 @@ export default function Calendar() {
                 );
                 return {...prev, entry: {...prev.entry, meals}};
             });
-
             // Aktualizacja rawDays
             setRawDays(prevDays =>
                 prevDays.map(day => {
@@ -271,7 +247,6 @@ export default function Calendar() {
                     };
                 })
             );
-
             setAmounts(prev => ({...prev, [productId]: ""}));
         } catch (error) {
             alert(error.message || "Nie udało się dodać produktu");
@@ -281,15 +256,12 @@ export default function Calendar() {
     const handleModifyProduct = async (mealId, mealProductId, productId, currentAmount, date) => {
         const newAmount = prompt("Podaj nową ilość (g)", currentAmount);
         const parsedAmount = Number(newAmount);
-
         if (!parsedAmount || parsedAmount <= 0) {
             alert("Podaj poprawną ilość produktu");
             return;
         }
-
         try {
             const updatedProduct = await updateMealProduct(mealProductId, productId, parsedAmount);
-
             // Aktualizacja modala
             setNutritionModal(prev => {
                 if (!prev.entry) return prev;
@@ -305,7 +277,6 @@ export default function Calendar() {
                 );
                 return {...prev, entry: {...prev.entry, meals}};
             });
-
             // Aktualizacja rawDays
             setRawDays(prevDays =>
                 prevDays.map(day => {
@@ -332,10 +303,8 @@ export default function Calendar() {
 
     const handleDeleteProduct = async (mealId, mealProductId, date) => {
         if (!window.confirm("Czy na pewno chcesz usunąć ten produkt?")) return;
-
         try {
             const deleted = await deleteMealProduct(mealProductId);
-
             // Aktualizacja modala
             setNutritionModal(prev => {
                 if (!prev.entry) return prev;
@@ -349,7 +318,6 @@ export default function Calendar() {
                 );
                 return {...prev, entry: {...prev.entry, meals}};
             });
-
             // Aktualizacja rawDays
             setRawDays(prevDays =>
                 prevDays.map(day => {
@@ -377,7 +345,6 @@ export default function Calendar() {
             alert("Uzupełnij wszystkie pola!");
             return;
         }
-
         try {
             const created = await addUserProduct({
                 name: newUserProduct.name,
@@ -386,7 +353,6 @@ export default function Calendar() {
                 fat: Number(newUserProduct.fat),
                 calories: Number(newUserProduct.calories),
             });
-
             setAllUserProducts((prev) => [...prev, created]);
             setAddUserProductModal({open: false});
             setNewUserProduct({name: "", protein: "", carbs: "", fat: "", calories: ""});
@@ -426,7 +392,6 @@ export default function Calendar() {
 
     const handleDeleteUserProduct = async (productId) => {
         if (!window.confirm("Czy na pewno chcesz usunąć ten produkt?")) return;
-
         try {
             await deleteUserProduct(productId);
             setAllUserProducts((prev) => prev.filter((p) => p.id !== productId));
@@ -441,10 +406,9 @@ export default function Calendar() {
             alert("Podaj liczbę serii i powtórzeń!");
             return;
         }
-
         try {
             const correctedDate = new Date(exerciseModal.date);
-            correctedDate.setDate(correctedDate.getDate() + 1); // jeśli potrzebne
+            correctedDate.setDate(correctedDate.getDate() + 1);
             const formattedDate = correctedDate.toISOString().split("T")[0];
             const newExercise = await addExercise({
                 day: formattedDate,
@@ -454,7 +418,6 @@ export default function Calendar() {
                 repetitions: Number(_reps),
                 weight: Number(_weight) || 0,
             });
-
             setTrainingModal((prev) => ({
                 ...prev,
                 entry: {
@@ -462,7 +425,6 @@ export default function Calendar() {
                     exercises: [...(prev.entry.exercises || []), newExercise],
                 },
             }));
-
             setRawDays((prevDays) =>
                 prevDays.map((day) => {
                     if (formatYYYYMMDD(parseDateFromServer(day)) !== formattedDate) return day;
@@ -492,7 +454,6 @@ export default function Calendar() {
             alert("Nie można modyfikować ćwiczenia bez ID");
             return;
         }
-
         try {
             const updatedData = await updateExercise({
                 exerciseId: id,
@@ -500,7 +461,6 @@ export default function Calendar() {
                 repetitions: _reps,
                 weight: _weight || 0,
             });
-
             const updatedExercise = { ...editExerciseModal.exercise, ...updatedData };
             setTrainingModal((prev) => {
                 if (!prev.entry) return prev;
@@ -509,7 +469,6 @@ export default function Calendar() {
                 );
                 return { ...prev, entry: { ...prev.entry, exercises } };
             });
-
             setRawDays((prevDays) =>
                 prevDays.map((dayItem) => {
                     const key = formatYYYYMMDD(parseDateFromServer(dayItem));
@@ -522,7 +481,6 @@ export default function Calendar() {
                     };
                 })
             );
-
             setEditExerciseModal({ open: false, date: null, dayId: null, exercise: null });
         } catch (err) {
             console.error("Błąd podczas modyfikacji ćwiczenia:", err);
@@ -537,9 +495,7 @@ export default function Calendar() {
             alert("Nie można usunąć ćwiczenia bez ID");
             return;
         }
-
         if (!window.confirm("Czy na pewno chcesz usunąć to ćwiczenie?")) return;
-
         try {
             const res = await deleteExercise(exerciseId);
             console.log("deleteExercise response:", res);
@@ -550,14 +506,12 @@ export default function Calendar() {
                 console.log("Zaktualizowane exercises po usunięciu:", exercises);
                 return { ...prev, entry: { ...prev.entry, exercises } };
             });
-
             setRawDays((prevDays) =>
                 prevDays.map((dayItem) => ({
                     ...dayItem,
                     exercises: dayItem.exercises.filter((ex) => ex.id !== exerciseId),
                 }))
             );
-
             alert("Ćwiczenie zostało usunięte.");
         } catch (err) {
             console.error("Błąd podczas usuwania ćwiczenia:", err);
@@ -746,7 +700,7 @@ export default function Calendar() {
                         </div>
                     )}
 
-                    {/* Modal user-products */}
+                    {/* Modal produktów użytkownika */}
                     {userProductModal.open && (
                         <div className="userproducts-overlay">
                             <div className="userproducts-modal">

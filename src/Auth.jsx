@@ -32,14 +32,12 @@ export default function AuthPage() {
             const token = await loginUser(login);
             sessionStorage.setItem("sb_token", token);
             const payload = JSON.parse(atob(token.split('.')[1]));
-
             const userData = {
                 id: payload.id,
                 firstName: payload.firstName,
                 lastName: payload.lastName,
                 role: payload.role
             };
-
             sessionStorage.setItem("sb_user", JSON.stringify(userData));
             setMsg({ type: "success", text: "Zalogowano pomyślnie" });
             window.location.href = "/";
@@ -54,13 +52,11 @@ export default function AuthPage() {
         e.preventDefault();
         setLoading(true);
         setMsg(null);
-
         if (Number(reg.age) < 1 || Number(reg.weight) < 1 || Number(reg.height) < 1) {
             setMsg({ type: "error", text: "Wiek, waga i wzrost muszą być większe niż 0" });
             setLoading(false);
             return;
         }
-
         try {
             const payload = {
                 ...reg,
@@ -68,7 +64,6 @@ export default function AuthPage() {
                 weight: Number(reg.weight),
                 height: Number(reg.height),
             };
-
             const data = await registerUser(payload);
             setMsg({ type: "success", text: data.message });
             setTab("login");
@@ -83,7 +78,6 @@ export default function AuthPage() {
         <div className="auth-container">
             <div className="auth-card">
                 <img src={Logo} alt="ShapeBuilder logo" className="auth-logo" />
-
                 <div className="auth-tabs">
                     <button
                         className={tab === "login" ? "active" : ""}
@@ -98,9 +92,7 @@ export default function AuthPage() {
                         Rejestracja
                     </button>
                 </div>
-
                 {msg && <div className={`auth-msg ${msg.type}`}>{msg.text}</div>}
-
                 {tab === "login" ? (
                     <form onSubmit={handleLogin} className="auth-form">
                         <label>
