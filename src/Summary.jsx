@@ -213,36 +213,33 @@ export default function Summary() {
 
         // DIETA – wykres słupkowy kcal
         if (tab === "nutrition" && (range === "week" || range === "month")) {
-            const kcalData = chartData.map(d => {
-                const proteinKcal = (d.protein ?? 0) * 4;
-                const carbsKcal = (d.carbs ?? 0) * 4;
-                const fatKcal = (d.fat ?? 0) * 9;
-                return { ...d, proteinKcal, carbsKcal, fatKcal, totalKcal: proteinKcal + carbsKcal + fatKcal };
-            });
+            const kcalData = chartData.map(d => ({
+                ...d,
+                proteinKcal: (d.protein ?? 0) * 4,
+                carbsKcal: (d.carbs ?? 0) * 4,
+                fatKcal: (d.fat ?? 0) * 9,
+                totalKcal: d.totalCalories ?? 0
+            }));
 
             const CustomTooltip = ({ active, payload, label }) => {
                 if (!active || !payload || payload.length === 0) return null;
-                const total = payload[0].payload.totalKcal ?? 0;
+
+                const { protein, carbs, fat, totalKcal } = payload[0].payload;
+                const totalGrams = (protein ?? 0) + (carbs ?? 0) + (fat ?? 0);
+
+                const formatMacro = (name, value) => {
+                    const percent = totalGrams ? ((value / totalGrams) * 100).toFixed(1) : 0;
+                    return `${name}: ${value.toFixed(1)} g (${percent}%)`;
+                };
+
                 return (
                     <div className="bg-white p-3 rounded-lg shadow-md text-sm border border-gray-200">
                         <p className="font-semibold mb-2">{label}</p>
-                        {payload.map(entry => {
-                            const value = entry.value ?? 0;
-                            const percent = total ? ((value / total) * 100).toFixed(1) : 0;
-                            const name = entry.dataKey === "proteinKcal" ? "Białko" : entry.dataKey === "carbsKcal" ? "Węgle" : "Tłuszcze";
-                            const color = entry.dataKey === "proteinKcal" ? "#3b82f6" : entry.dataKey === "carbsKcal" ? "#22c55e" : "#eab308";
-                            return (
-                                <div key={entry.dataKey} className="flex justify-between items-center mb-1">
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></span>
-                                        <span style={{ color }}>{name}:</span>
-                                    </span>
-                                    <span> {value.toFixed(0)} kcal ({percent}%)</span>
-                                </div>
-                            );
-                        })}
-                        <p className="mt-2 text-gray-500 border-t pt-1">
-                            <strong>Razem:</strong> {total.toFixed(0)} kcal
+                        <p>{formatMacro("Białko", protein ?? 0)}</p>
+                        <p>{formatMacro("Węgle", carbs ?? 0)}</p>
+                        <p>{formatMacro("Tłuszcz", fat ?? 0)}</p>
+                        <p className="mt-2 border-t pt-1">
+                            <strong>Razem:</strong> {totalKcal.toFixed(0)} kcal
                         </p>
                     </div>
                 );
@@ -250,20 +247,34 @@ export default function Summary() {
 
             return (
                 <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={kcalData} barSize={40} barCategoryGap="20%" margin={{top: 20, right: 30, left: 20, bottom: 20}}>
-                        <CartesianGrid strokeDasharray="3 3"/>
-                        <XAxis dataKey="date"/>
-                        <YAxis domain={[0, 5000]}/>
-                        <Tooltip content={<CustomTooltip/>}/>
-                        <Legend payload={[
-                            { value: "Białko", type: "square", color: "#3b82f6" },
-                            { value: "Węgle", type: "square", color: "#22c55e" },
-                            { value: "Tłuszcze", type: "square", color: "#eab308" },
-                        ]}/>
-                        <Bar dataKey="proteinKcal" stackId="a" fill="#3b82f6"/>
-                        <Bar dataKey="carbsKcal" stackId="a" fill="#22c55e"/>
-                        <Bar dataKey="fatKcal" stackId="a" fill="#eab308"/>
-                        {caloricRequisition && <ReferenceLine y={caloricRequisition} stroke="red" strokeDasharray="3 3" label={{ position: 'right', fill: 'red', fontSize: 12 }}/>}
+                    <BarChart
+                        data={kcalData}
+                        barSize={40}
+                        barCategoryGap="20%"
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis domain={[0, 5000]} /> {/* Oś Y w kcal */}
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend
+                            payload={[
+                                { value: "Białko", type: "square", color: "#3b82f6" },
+                                { value: "Węgle", type: "square", color: "#22c55e" },
+                                { value: "Tłuszcze", type: "square", color: "#eab308" },
+                            ]}
+                        />
+                        <Bar dataKey="proteinKcal" stackId="a" fill="#3b82f6" />
+                        <Bar dataKey="carbsKcal" stackId="a" fill="#22c55e" />
+                        <Bar dataKey="fatKcal" stackId="a" fill="#eab308" />
+                        {caloricRequisition && (
+                            <ReferenceLine
+                                y={caloricRequisition}
+                                stroke="red"
+                                strokeDasharray="3 3"
+                                label={{ position: 'right', fill: 'red', fontSize: 12 }}
+                            />
+                        )}
                     </BarChart>
                 </ResponsiveContainer>
             );
