@@ -531,3 +531,19 @@ export async function getMonthExerciseSummary(userId, year, month){
     }
     return await res.json();
 }
+
+/**
+ * Pobranie historii wagi użytkownika
+ * @returns {Promise<any>} - dane historyczne wagi użytkownika
+ */
+export async function getWeightHistory() {
+    const res = await fetch(`${API_URL}/user/weight-history`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Nie udało się pobrać historii wagi użytkownika");
+    }
+    return res.json();
+}

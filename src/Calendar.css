@@ -9,11 +9,14 @@ body {
 
 /* KALENDARZ */
 .calendar-container {
-    padding: calc(var(--navbar-height) + 2px) 20px 40px 20px;
+    padding: calc(var(--navbar-height) + 2px);
     max-width: 1800px;
     margin: 0 auto;
     box-sizing: border-box;
-    min-height: calc(100vh - var(--navbar-height) - 40px);
+    min-height: calc(var(--navbar-height));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .calendar-topline {
@@ -100,6 +103,18 @@ body {
 .calendar-day.today {
     background-color: #e6f4ea;
     border-color: #9edaa6;
+}
+
+.calendar-day.training {
+    background-color: #a7d7a2;
+    border-color: #6cb96b;
+    color: #0b3d0b;
+}
+
+.calendar-day.weekend.training {
+    background-color: #a7d7a2 !important;
+    border-color: #6cb96b !important;
+    color: #0b3d0b !important;
 }
 
 .calendar-day.weekend {

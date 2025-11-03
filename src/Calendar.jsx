@@ -1118,7 +1118,7 @@ export default function Calendar() {
                         let cls = "calendar-day";
                         if (isToday) cls += " today";
                         else if (isWeekend) cls += " weekend";
-
+                        if (entry && entry.exercises && entry.exercises.length > 0) cls += " training";
                         return (
                             <div key={formatYYYYMMDD(date)} className={cls}>
                                 <div className="day-number">{date.getDate()}</div>

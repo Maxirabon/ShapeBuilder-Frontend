@@ -6,7 +6,7 @@ import {
     getDayExerciseSummary,
     getWeekExerciseSummary,
     getMonthExerciseSummary,
-    getUserDays, getUserCaloricRequisition,
+    getUserDays, getUserCaloricRequisition, getWeightHistory,
 } from "./api";
 import {
     LineChart,
@@ -48,6 +48,8 @@ export default function Summary() {
 
     const [userDays, setUserDays] = useState([]);
     const [caloricRequisition, setCaloricRequisition] = useState(null);
+    const [weightHistory, setWeightHistory] = useState([]);
+    const [selectedWeightMonth, setSelectedWeightMonth] = useState({year: today.getFullYear(), month: today.getMonth() + 1});
 
     useEffect(() => {
         const storedUser = sessionStorage.getItem("sb_user");
@@ -82,6 +84,18 @@ export default function Summary() {
             }
         }
         if (user) fetchCalories();
+    }, [user]);
+
+    useEffect(() => {
+        async function fetchWeightHistory() {
+            try {
+                const data = await getWeightHistory();
+                setWeightHistory(data);
+            } catch (err) {
+                console.error("Błąd pobierania historii wagi:", err);
+            }
+        }
+        if (user) fetchWeightHistory();
     }, [user]);
 
     useEffect(() => { loadNutritionData(); }, [user, rangeNutrition, selectedDayIdNutrition, selectedWeekNutrition, selectedMonthNutrition]);
@@ -174,6 +188,14 @@ export default function Summary() {
         return ISOweekStart.toISOString().split("T")[0];
     }
 
+    const filteredWeightHistory = weightHistory.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return (
+            entryDate.getFullYear() === selectedWeightMonth.year &&
+            entryDate.getMonth() + 1 === selectedWeightMonth.month
+        );
+    });
+
     const renderChart = (tab) => {
         const chartData = tab === "nutrition" ? chartDataNutrition : chartDataTraining;
         const range = tab === "nutrition" ? rangeNutrition : rangeTraining;
@@ -191,7 +213,7 @@ export default function Summary() {
             ];
             return (
                 <div className="summary-piechart">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                             <Pie
                                 data={pieData}
@@ -215,9 +237,9 @@ export default function Summary() {
         if (tab === "nutrition" && (range === "week" || range === "month")) {
             const kcalData = chartData.map(d => ({
                 ...d,
-                proteinKcal: (d.protein ?? 0) * 4,
-                carbsKcal: (d.carbs ?? 0) * 4,
-                fatKcal: (d.fat ?? 0) * 9,
+                białkoKcal: (d.protein ?? 0) * 4,
+                węgleKcal: (d.carbs ?? 0) * 4,
+                tłuszczeKcal: (d.fat ?? 0) * 9,
                 totalKcal: d.totalCalories ?? 0
             }));
 
@@ -264,9 +286,9 @@ export default function Summary() {
                                 { value: "Tłuszcze", type: "square", color: "#eab308" },
                             ]}
                         />
-                        <Bar dataKey="proteinKcal" stackId="a" fill="#3b82f6" />
-                        <Bar dataKey="carbsKcal" stackId="a" fill="#22c55e" />
-                        <Bar dataKey="fatKcal" stackId="a" fill="#eab308" />
+                        <Bar dataKey="białkoKcal" stackId="a" fill="#3b82f6" />
+                        <Bar dataKey="węgleKcal" stackId="a" fill="#22c55e" />
+                        <Bar dataKey="tłuszczeKcal" stackId="a" fill="#eab308" />
                         {caloricRequisition && (
                             <ReferenceLine
                                 y={caloricRequisition}
@@ -317,17 +339,57 @@ export default function Summary() {
                 </ResponsiveContainer>
             );
         }
-
         return <p className="summary-empty">Brak danych do wyświetlenia.</p>;
     };
+
+    function WeightChart({ weightHistory, selectedWeightMonth }) {
+        const filteredData = weightHistory.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return (
+                entryDate.getFullYear() === selectedWeightMonth.year &&
+                entryDate.getMonth() + 1 === selectedWeightMonth.month
+            );
+        });
+
+        if (filteredData.length === 0) {
+            return <p className="summary-empty">Brak danych do wyświetlenia.</p>;
+        }
+
+        return (
+            <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={filteredData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis domain={['dataMin - 2', 'dataMax + 2']} />
+                    <Tooltip content={({ active, payload, label }) => {
+                        if (!active || !payload || payload.length === 0) return null;
+                        return (
+                            <div className="bg-white p-3 rounded-lg shadow-md text-sm border border-gray-200">
+                                <p className="font-semibold mb-2">{label}</p>
+                                <p>Waga: {payload[0].value.toFixed(1)} kg</p>
+                            </div>
+                        );
+                    }} />
+                    <Legend />
+                    <Line
+                        type="monotone"
+                        dataKey="weight"
+                        name="Waga (kg)"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                    />
+                </LineChart>
+            </ResponsiveContainer>
+        );
+    }
 
     return (
         <div className="summary-container">
             <h1 className="summary-title">Podsumowania</h1>
 
-            <div className="summary-sections">
+            <div className="summary-top-sections">
                 {/* DIETA */}
-                <div className="summary-section">
+                <div className="summary-section summary-nutrition">
                     <h2 className="summary-section-title">Analiza diety</h2>
 
                     <div className="summary-range">
@@ -410,7 +472,7 @@ export default function Summary() {
                 </div>
 
                 {/* TRENING */}
-                <div className="summary-section">
+                <div className="summary-section summary-training">
                     <h2 className="summary-section-title">Analiza treningu</h2>
 
                     <div className="summary-range">
@@ -477,6 +539,23 @@ export default function Summary() {
                             {(rangeTraining === "week" || rangeTraining === "month") && renderChart("training")}
                         </>
                     )}
+                </div>
+            </div>
+            <div className="summary-section summary-weight">
+                <h2 className="summary-section-title">Historia wagi</h2>
+                <input
+                    type="month"
+                    value={`${selectedWeightMonth.year}-${String(selectedWeightMonth.month).padStart(2, "0")}`}
+                    min={userDays.length > 0 ? userDays[0].day.slice(0, 7) : ""}
+                    max={userDays.length > 0 ? userDays[userDays.length - 1].day.slice(0, 7) : ""}
+                    onChange={e => {
+                        const [year, month] = e.target.value.split("-");
+                        setSelectedWeightMonth({ year: parseInt(year), month: parseInt(month) });
+                    }}
+                />
+
+                <div className="summary-chart">
+                    <WeightChart weightHistory={weightHistory} selectedWeightMonth={selectedWeightMonth} />
                 </div>
             </div>
         </div>
