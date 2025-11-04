@@ -188,14 +188,6 @@ export default function Summary() {
         return ISOweekStart.toISOString().split("T")[0];
     }
 
-    const filteredWeightHistory = weightHistory.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return (
-            entryDate.getFullYear() === selectedWeightMonth.year &&
-            entryDate.getMonth() + 1 === selectedWeightMonth.month
-        );
-    });
-
     const renderChart = (tab) => {
         const chartData = tab === "nutrition" ? chartDataNutrition : chartDataTraining;
         const range = tab === "nutrition" ? rangeNutrition : rangeTraining;
@@ -349,7 +341,8 @@ export default function Summary() {
                 entryDate.getFullYear() === selectedWeightMonth.year &&
                 entryDate.getMonth() + 1 === selectedWeightMonth.month
             );
-        });
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
         if (filteredData.length === 0) {
             return <p className="summary-empty">Brak danych do wyświetlenia.</p>;
