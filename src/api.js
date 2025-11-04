@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 const API_URL = "http://localhost:8080";
 
 /**
@@ -546,4 +547,127 @@ export async function getWeightHistory() {
         throw new Error(errorData.error || "Nie udało się pobrać historii wagi użytkownika");
     }
     return res.json();
+}
+
+/**
+ * Dodanie nowego produktu (tylko dla administratora)
+ * Wymaga aktywnego JWT i roli ADMIN
+ * @param {Object} productData - dane nowego produktu { name, protein, fat, carbs, calories }
+ * @returns {Promise<any>} - obiekt dodanego produktu
+ */
+export async function addProduct(productData) {
+    const res = await fetch(`${API_URL}/admin/addProduct`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(productData),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Nie udało się dodać produktu");
+    }
+    return await res.json();
+}
+
+/**
+ * Aktualizacja istniejącego produktu (tylko dla administratora)
+ * @param {Object} productData - dane produktu do aktualizacji { id, name, protein, fat, carbs, calories }
+ * @returns {Promise<any>} - zaktualizowany obiekt produktu
+ */
+export async function updateProduct(productData) {
+    const res = await fetch(`${API_URL}/admin/updateProduct`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(productData),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Nie udało się zaktualizować produktu");
+    }
+    return await res.json();
+}
+
+/**
+ * Usunięcie produktu (tylko dla administratora)
+ * @param {number} id - ID produktu do usunięcia
+ * @returns {Promise<string>} - komunikat potwierdzający usunięcie
+ */
+export async function deleteProduct(id) {
+    const res = await fetch(`${API_URL}/admin/deleteProduct/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Nie udało się usunąć produktu");
+    }
+    return await res.text();
+}
+
+/**
+ * Dodanie nowego szablonu ćwiczenia (tylko dla administratora)
+ * @param {Object} templateData - dane nowego szablonu ćwiczenia { name }
+ * @returns {Promise<any>} - obiekt dodanego szablonu
+ */
+export async function addExerciseTemplate(templateData) {
+    const res = await fetch(`${API_URL}/admin/addExerciseTemplate`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(templateData),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Nie udało się dodać szablonu ćwiczenia");
+    }
+    return await res.json();
+}
+
+/**
+ * Aktualizacja istniejącego szablonu ćwiczenia (tylko dla administratora)
+ * @param {Object} templateData - dane szablonu do aktualizacji { id, name }
+ * @returns {Promise<any>} - zaktualizowany obiekt szablonu ćwiczenia
+ */
+export async function updateExerciseTemplate(templateData) {
+    const res = await fetch(`${API_URL}/admin/updateExerciseTemplate`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(templateData),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Nie udało się zaktualizować szablonu ćwiczenia");
+    }
+    return await res.json();
+}
+
+/**
+ * Usunięcie szablonu ćwiczenia (tylko dla administratora)
+ * @param {number} id - ID szablonu ćwiczenia do usunięcia
+ * @returns {Promise<string>} - komunikat potwierdzający usunięcie
+ */
+export async function deleteExerciseTemplate(id) {
+    const res = await fetch(`${API_URL}/admin/deleteExerciseTemplate/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Nie udało się usunąć szablonu ćwiczenia");
+    }
+    return await res.text();
+}
+
+/**
+ * Pobiera rolę użytkownika z JWT tokena
+ * @returns {string|null} - rola użytkownika ("USER" | "ADMIN") lub null jeśli token nie istnieje
+ */
+export function getUserRoleFromToken() {
+    const token = sessionStorage.getItem("sb_token");
+    if (!token) return null;
+    try {
+        const decoded = jwtDecode(token);
+        return decoded.role || null;
+    } catch (err) {
+        console.error("Błąd dekodowania tokena:", err);
+        return null;
+    }
 }

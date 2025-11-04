@@ -6,7 +6,7 @@ import {
     getAllProducts,
     getUserCaloricRequisition,
     getUserDays, getUserProducts, modifyUserProduct, updateExercise,
-    updateMealProduct
+    updateMealProduct, getUserRoleFromToken, addProduct, updateProduct, deleteProduct
 } from "./api";
 import "./Calendar.css";
 
@@ -52,6 +52,11 @@ export default function Calendar() {
     const [addUserProductModal, setAddUserProductModal] = useState({open: false});
     const [newUserProduct, setNewUserProduct] = useState({name: "", protein: "", carbs: "", fat: "", calories: ""});
     const [editExerciseModal, setEditExerciseModal] = useState({open: false, exercise: null, dayId: null, date: null,});
+    const [adminProductModal, setAdminProductModal] = useState({open: false, isEditing: false,});
+    const [newAdminProduct, setNewAdminProduct] = useState({id: null, name: "", protein: "", fat: "", carbs: "", calories: "",});
+
+    const role = getUserRoleFromToken();
+    const isAdmin = role === "ROLE_ADMIN";
 
     //Funkcja pomocnicza - wyznacznie najmniejszej daty z kalendarza z backendu
     const minDate = useMemo(() => {
@@ -519,6 +524,42 @@ export default function Calendar() {
         }
     };
 
+    async function handleSaveAdminProduct() {
+        try {
+            await addProduct(newAdminProduct);
+            alert("Produkt dodany do bazy!");
+            setAdminProductModal({ open: false, isEditing: false });
+            const updated = await getAllProducts();
+            setAllProducts(updated);
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    async function handleModifyAdminProduct() {
+        try {
+            await updateProduct(newAdminProduct);
+            alert("Produkt zaktualizowany!");
+            setAdminProductModal({ open: false, isEditing: false });
+            const updated = await getAllProducts();
+            setAllProducts(updated);
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    async function handleDeleteAdminProduct(id) {
+        if (!window.confirm("Na pewno chcesz usunąć ten produkt z bazy?")) return;
+        try {
+            await deleteProduct(id);
+            alert("Produkt usunięty!");
+            const updated = await getAllProducts();
+            setAllProducts(updated);
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
     return (
         <div className="calendar-container">
             {user && (
@@ -676,6 +717,7 @@ export default function Calendar() {
                                                     }
                                                 />
                                                 <button
+                                                    className="product-add"
                                                     onClick={() =>
                                                         handleAddProduct(
                                                             productModal.mealId,
@@ -687,14 +729,109 @@ export default function Calendar() {
                                                 >
                                                     Dodaj
                                                 </button>
+                                                {isAdmin && (
+                                                    <>
+                                                        <button
+                                                            className="product-modify"
+                                                            onClick={() => {
+                                                                setNewAdminProduct({
+                                                                    id: p.id,
+                                                                    name: p.name,
+                                                                    protein: p.protein,
+                                                                    carbs: p.carbs,
+                                                                    fat: p.fat,
+                                                                    calories: p.calories,
+                                                                });
+                                                                setAdminProductModal({ open: true, isEditing: true });
+                                                            }}
+                                                        >
+                                                            Modyfikuj
+                                                        </button>
+                                                        <button
+                                                            className="product-delete"
+                                                            onClick={() => handleDeleteAdminProduct(p.id)}
+                                                        >
+                                                            Usuń
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         ))}
                                 </div>
+                                {/* Tylko dla administratora */}
+                                {isAdmin && (
+                                    <button
+                                        className="admin-add-btn"
+                                        onClick={() => setAdminProductModal({ open: true, isEditing: false })}
+                                    >
+                                        Dodaj produkt do bazy
+                                    </button>
+                                )}
                                 <button className="close-btn" onClick={() => setProductModal({
                                     open: false,
                                     mealId: null,
                                     mealType: null
                                 })}>Zamknij
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {adminProductModal.open && (
+                        <div className="adduserproduct-overlay">
+                            <div className="adduserproduct-modal">
+                                <h2>{adminProductModal.isEditing ? "Edytuj produkt w bazie" : "Dodaj nowy produkt do bazy"}</h2>
+
+                                <input
+                                    type="text"
+                                    placeholder="Nazwa produktu"
+                                    value={newAdminProduct.name}
+                                    onChange={(e) => setNewAdminProduct({ ...newAdminProduct, name: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Białko (g/100g)"
+                                    value={newAdminProduct.protein}
+                                    onChange={(e) => setNewAdminProduct({ ...newAdminProduct, protein: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Węglowodany (g/100g)"
+                                    value={newAdminProduct.carbs}
+                                    onChange={(e) => setNewAdminProduct({ ...newAdminProduct, carbs: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Tłuszcz (g/100g)"
+                                    value={newAdminProduct.fat}
+                                    onChange={(e) => setNewAdminProduct({ ...newAdminProduct, fat: e.target.value })}
+                                    className="search-input"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Kalorie (kcal/100g)"
+                                    value={newAdminProduct.calories}
+                                    onChange={(e) => setNewAdminProduct({ ...newAdminProduct, calories: e.target.value })}
+                                    className="search-input"
+                                />
+
+                                <button
+                                    className="modify-btn"
+                                    onClick={
+                                        adminProductModal.isEditing ? handleModifyAdminProduct : handleSaveAdminProduct
+                                    }
+                                >
+                                    {adminProductModal.isEditing ? "Zapisz zmiany" : "Zapisz"}
+                                </button>
+
+                                <button
+                                    className="adduserproduct-close"
+                                    onClick={() => setAdminProductModal({ open: false, isEditing: false })}
+                                >
+                                    Anuluj
                                 </button>
                             </div>
                         </div>
@@ -787,6 +924,7 @@ export default function Calendar() {
                                 )}
                                 <div className="userproducts-actions">
                                     <button
+                                        className="product-add"
                                         onClick={() =>
                                             setAddUserProductModal({ open: true, isEditing: false })
                                         }
