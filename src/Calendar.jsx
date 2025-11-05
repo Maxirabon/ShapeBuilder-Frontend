@@ -1,12 +1,26 @@
 import React, {useEffect, useMemo, useState} from "react";
+import { eventBus } from "./utils/eventBus";
 import {
     addExercise,
-    addMealProduct, addUserProduct, deleteExercise,
-    deleteMealProduct, deleteUserProduct, getAllExerciseTemplates,
+    addMealProduct,
+    addUserProduct,
+    deleteExercise,
+    deleteMealProduct,
+    deleteUserProduct,
+    getAllExerciseTemplates,
     getAllProducts,
     getUserCaloricRequisition,
-    getUserDays, getUserProducts, modifyUserProduct, updateExercise,
-    updateMealProduct, getUserRoleFromToken, addProduct, updateProduct, deleteProduct
+    getUserDays,
+    getUserProducts,
+    modifyUserProduct,
+    updateExercise,
+    updateMealProduct,
+    getUserRoleFromToken,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    deleteExerciseTemplate,
+    addExerciseTemplate, updateExerciseTemplate
 } from "./api";
 import "./Calendar.css";
 
@@ -54,6 +68,8 @@ export default function Calendar() {
     const [editExerciseModal, setEditExerciseModal] = useState({open: false, exercise: null, dayId: null, date: null,});
     const [adminProductModal, setAdminProductModal] = useState({open: false, isEditing: false,});
     const [newAdminProduct, setNewAdminProduct] = useState({id: null, name: "", protein: "", fat: "", carbs: "", calories: "",});
+    const [adminExerciseModal, setAdminExerciseModal] = useState({ open: false, isEditing: false });
+    const [newAdminExercise, setNewAdminExercise] = useState({ id: null, name: "" });
 
     const role = getUserRoleFromToken();
     const isAdmin = role === "ROLE_ADMIN";
@@ -129,17 +145,18 @@ export default function Calendar() {
         fetchProducts();
     }, [productModal.open]);
 
+    async function fetchAllExerciseTemplates() {
+        try {
+            const exerciseTemplates = await getAllExerciseTemplates();
+            setAllExerciseTemplates(Array.isArray(exerciseTemplates) ? exerciseTemplates : []);
+        } catch (err) {
+            console.error("Błąd pobierania schematów ćwiczeń:", err);
+        }
+    }
+
     useEffect(() => {
         if(!exerciseModal.open) return;
-        async function fetchExerciseTemplates() {
-            try{
-                const exerciseTemplates = await getAllExerciseTemplates();
-                setAllExerciseTemplates(Array.isArray(exerciseTemplates) ? exerciseTemplates : []);
-            }catch(err){
-                console.error("Błąd pobierania schematów ćwiczeń:", err);
-            }
-        }
-        fetchExerciseTemplates();
+        fetchAllExerciseTemplates();
     }, [exerciseModal.open]);
 
     useEffect(() => {
@@ -154,6 +171,23 @@ export default function Calendar() {
         }
         fetchUserProducts();
     }, [userProductModal.open]);
+
+    useEffect(() => {
+        const unsubscribe = eventBus.subscribe("dataChanged", async (event) => {
+            console.log("Odebrano event:", event);
+
+            if (event.type === "productDeleted" || event.type === "exerciseDeleted") {
+                try {
+                    const updatedDays = await getUserDays();
+                    setRawDays(updatedDays);
+                } catch (err) {
+                    console.error("Błąd odświeżania dni po zmianach:", err);
+                }
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     // Funkcja pomocnicza - utworzenie mapy dni do obiektów backendu
     const daysMap = useMemo(() => {
@@ -552,9 +586,54 @@ export default function Calendar() {
         if (!window.confirm("Na pewno chcesz usunąć ten produkt z bazy?")) return;
         try {
             await deleteProduct(id);
+            eventBus.publish("dataChanged", { type: "productDeleted", id });
             alert("Produkt usunięty!");
             const updated = await getAllProducts();
             setAllProducts(updated);
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    async function handleSaveAdminExercise() {
+        try {
+            await addExerciseTemplate({ name: newAdminExercise.name });
+            alert("Ćwiczenie zostało dodane!");
+            setAdminExerciseModal({ open: false, isEditing: false });
+            fetchAllExerciseTemplates(); // odśwież listę
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    async function handleModifyAdminExercise() {
+        try {
+            await updateExerciseTemplate(newAdminExercise);
+            alert("Ćwiczenie zostało zmodyfikowane!");
+            setAdminExerciseModal({ open: false, isEditing: false });
+            fetchAllExerciseTemplates();
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    async function handleDeleteAdminExercise(id) {
+        if (!window.confirm("Czy na pewno chcesz usunąć to ćwiczenie z bazy?")) return;
+        try {
+            await deleteExerciseTemplate(id);
+            eventBus.publish("dataChanged", { type: "exerciseDeleted", id });
+            setAllExerciseTemplates(prev => prev.filter(ex => ex.id !== id));
+            setRawDays(prevDays =>
+                prevDays.map(day => ({
+                    ...day,
+                    exercises: day.exercises
+                        ? day.exercises.filter(ex => ex.exerciseTemplate?.id !== id)
+                        : []
+                }))
+            );
+            if (exerciseModal.open) {
+                await fetchAllExerciseTemplates();
+            }
         } catch (err) {
             alert(err.message);
         }
@@ -1154,10 +1233,37 @@ export default function Calendar() {
                                                 >
                                                     Dodaj
                                                 </button>
+
+                                                {isAdmin && (
+                                                    <>
+                                                        <button
+                                                            className="btn-edit"
+                                                            onClick={() => {
+                                                                setNewAdminExercise({ id: ex.id, name: ex.name });
+                                                                setAdminExerciseModal({ open: true, isEditing: true });
+                                                            }}
+                                                        >
+                                                            Modyfikuj
+                                                        </button>
+                                                        <button
+                                                            className="btn-delete"
+                                                            onClick={() => handleDeleteAdminExercise(ex.id)}
+                                                        >
+                                                            Usuń
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         ))}
                                 </div>
-
+                                {isAdmin && (
+                                    <button
+                                        className="admin-add-btn"
+                                        onClick={() => setAdminExerciseModal({ open: true, isEditing: false })}
+                                    >
+                                        Dodaj ćwiczenie do bazy
+                                    </button>
+                                )}
                                 <button
                                     className="close-btn"
                                     onClick={() => setExerciseModal({ open: false, date: null, dayId: null })}
@@ -1225,6 +1331,40 @@ export default function Calendar() {
                                         Anuluj
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {adminExerciseModal.open && (
+                        <div className="adduserproduct-overlay">
+                            <div className="adduserproduct-modal">
+                                <h2>{adminExerciseModal.isEditing ? "Edytuj ćwiczenie w bazie" : "Dodaj nowe ćwiczenie do bazy"}</h2>
+
+                                <input
+                                    type="text"
+                                    placeholder="Nazwa ćwiczenia"
+                                    value={newAdminExercise.name}
+                                    onChange={(e) => setNewAdminExercise({ ...newAdminExercise, name: e.target.value })}
+                                    className="search-input"
+                                />
+
+                                <button
+                                    className="modify-btn"
+                                    onClick={
+                                        adminExerciseModal.isEditing
+                                            ? handleModifyAdminExercise
+                                            : handleSaveAdminExercise
+                                    }
+                                >
+                                    {adminExerciseModal.isEditing ? "Zapisz zmiany" : "Zapisz"}
+                                </button>
+
+                                <button
+                                    className="adduserproduct-close"
+                                    onClick={() => setAdminExerciseModal({ open: false, isEditing: false })}
+                                >
+                                    Anuluj
+                                </button>
                             </div>
                         </div>
                     )}

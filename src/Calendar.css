@@ -216,7 +216,7 @@ body {
     background: #fff;
     border-radius: 12px;
     padding: 20px;
-    max-width: 600px;
+    max-width: 950px;
     width: 90%;
     max-height: 88vh;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
@@ -273,17 +273,16 @@ body {
 }
 
 .meal-product-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
+    gap: 12px;
     padding: 8px 12px;
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
 }
 
 .meal-product-item:hover {
@@ -291,11 +290,9 @@ body {
 }
 
 .meal-product-item span {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    color: #333;
-    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .meal-product-item button {
@@ -315,7 +312,8 @@ body {
 
 .meal-product-actions {
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    justify-self: end;
 }
 
 .meal-product-actions button {
@@ -392,9 +390,9 @@ body {
 
 
 .product-item {
-    display: grid;
-    grid-template-columns: 1fr 90px 70px 70px 70px;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
     padding: 8px;
     background: #fff;
@@ -402,12 +400,29 @@ body {
     border: 1px solid #e0e0e0;
 }
 
+.product-item span {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    justify-content: flex-end;
+}
+
 .product-item:hover {
     background-color: #C6F4C5;
 }
 
 .product-item input[type="number"] {
-    width: 100%;
+    width: 80px;
+    min-width: 80px;
     padding: 4px 6px;
     border-radius: 6px;
     border: 1px solid #ccc;
@@ -741,38 +756,43 @@ body {
 .exercise-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-height: 300px;
+    gap: 14px;
+    max-height: 450px;
     overflow-y: auto;
-    padding-right: 4px;
+    padding-right: 6px;
 }
 
 .exercise-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    padding: 8px 10px;
+    gap: 16px;
+    padding: 10px 14px;
     background: #fff;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    margin-bottom: 8px;
+    border-radius: 10px;
+    border: 1px solid #d9d9d9;
+    margin-bottom: 10px;
+    font-size: 15px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
+
 .exercise-item:hover {
-    background-color: #C6F4C5;
+    background-color: #e8f5e9;
+    transform: scale(1.01);
 }
 
 .exercise-name {
-    flex: 1;
-    font-size: 14px;
-    color: #333;
+    flex: 2; /* było 1 — zwiększa szerokość nazwy */
+    font-size: 15px;
+    color: #222;
     font-weight: 500;
 }
 
 .exercise-input {
-    width: 70px;
-    padding: 5px;
+    width: 80px;
+    padding: 6px;
     border: 1px solid #ccc;
     border-radius: 6px;
     text-align: center;
@@ -780,11 +800,11 @@ body {
 }
 
 .exercise-input:last-of-type {
-    width: 90px;
+    width: 100px;
 }
 
 .exercise-item button {
-    padding: 6px 10px;
+    padding: 6px 12px;
     border-radius: 6px;
     border: 1px solid #ccc;
     background: #fafafa;
@@ -793,11 +813,24 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.exercise-item button:hover {
+.exercise-item .btn-add:hover {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+}
+
+.exercise-item .btn-edit:hover {
     background-color: #34eb4f;
     color: #fff;
     border-color: #34eb4f;
 }
+
+.exercise-item .btn-delete:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+}
+
 
 .exercise-item span {
     flex: 1;
